@@ -1,0 +1,1586 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Aagency.ai — Turn your expertise into an agency</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  :root {
+    --black: #080808;
+    --off-black: #0e0e0e;
+    --border: #1a1a1a;
+    --border-light: #242424;
+    --text-primary: #f0f0f0;
+    --text-secondary: #888;
+    --text-muted: #444;
+    --white: #ffffff;
+  }
+
+  body {
+    background: var(--black);
+    color: var(--text-primary);
+    font-family: -apple-system, 'Inter', 'Helvetica Neue', sans-serif;
+    font-size: 14px;
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* ─── NAV ─── */
+  nav {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    z-index: 100;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 24px 60px;
+    border-bottom: 1px solid var(--border);
+    background: rgba(8,8,8,0.92);
+    backdrop-filter: blur(12px);
+  }
+
+  .nav-logo {
+    font-family: Georgia, 'Times New Roman', serif;
+    font-size: 19px;
+    color: var(--white);
+    letter-spacing: 0.3px;
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    font-weight: normal;
+  }
+
+  .nav-logo-text {
+    display: flex;
+    align-items: baseline;
+    gap: 0;
+  }
+
+  .nav-logo-name {
+    font-style: italic;
+    letter-spacing: -0.5px;
+  }
+
+  .nav-logo-tld {
+    color: var(--text-secondary);
+    font-style: normal;
+    font-size: 15px;
+    letter-spacing: 0;
+  }
+
+  .nav-logo-star {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 17px;
+    line-height: 1;
+    animation: star-spin 5s linear infinite, star-color 8s ease-in-out infinite;
+    transform-origin: center;
+  }
+
+  @keyframes star-spin {
+    0%   { transform: rotate(0deg)   scale(1);    }
+    25%  { transform: rotate(90deg)  scale(1.18); }
+    50%  { transform: rotate(180deg) scale(1);    }
+    75%  { transform: rotate(270deg) scale(1.18); }
+    100% { transform: rotate(360deg) scale(1);    }
+  }
+
+  @keyframes star-color {
+    0%   { color: #ffffff;  text-shadow: 0 0 8px rgba(255,255,255,0.4); }
+    14%  { color: #a78bfa;  text-shadow: 0 0 12px rgba(167,139,250,0.6); }
+    28%  { color: #60a5fa;  text-shadow: 0 0 12px rgba(96,165,250,0.6); }
+    42%  { color: #34d399;  text-shadow: 0 0 12px rgba(52,211,153,0.6); }
+    57%  { color: #f472b6;  text-shadow: 0 0 12px rgba(244,114,182,0.6); }
+    71%  { color: #fb923c;  text-shadow: 0 0 12px rgba(251,146,60,0.6); }
+    85%  { color: #818cf8;  text-shadow: 0 0 12px rgba(129,140,248,0.6); }
+    100% { color: #ffffff;  text-shadow: 0 0 8px rgba(255,255,255,0.4); }
+  }
+
+  .nav-links {
+    display: flex;
+    align-items: center;
+    gap: 40px;
+  }
+
+  .nav-links a {
+    font-size: 12px;
+    color: var(--text-secondary);
+    text-decoration: none;
+    letter-spacing: 0.5px;
+    position: relative;
+  }
+
+  .nav-links a::after {
+    content: '';
+    position: absolute;
+    bottom: -4px;
+    left: 0; right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, #a78bfa, #60a5fa, #34d399, #f472b6);
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform 0.35s cubic-bezier(0.16,1,0.3,1);
+  }
+
+  .nav-links a:not(.nav-cta):hover { color: var(--white); }
+  .nav-links a:not(.nav-cta):hover::after { transform: scaleX(1); }
+
+  .nav-cta {
+    font-size: 11px;
+    color: var(--white) !important;
+    border: 1px solid var(--border-light) !important;
+    padding: 8px 20px;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    transition: border-color 0.2s;
+  }
+
+  /* ─── HERO ─── */
+  .hero {
+    min-height: 100vh;
+    padding: 160px 60px 100px;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    border-bottom: 1px solid var(--border);
+    position: relative;
+    overflow: hidden;
+  }
+
+  /* ─── CURSOR GLOW ─── */
+  .cursor-glow {
+    position: absolute;
+    width: 500px;
+    height: 500px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(255,255,255,0.04) 0%, transparent 70%);
+    pointer-events: none;
+    transform: translate(-50%, -50%);
+    transition: opacity 0.4s;
+    z-index: 1;
+  }
+
+  /* ─── PHOTO GRID ─── */
+  .hero-photo-grid {
+    position: absolute;
+    top: 0; right: 0;
+    width: 42%;
+    height: 100%;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    grid-template-rows: repeat(4, 1fr);
+    gap: 2px;
+    opacity: 0;
+    will-change: transform;
+    animation: grid-fade-in 1.4s ease 0.3s forwards;
+  }
+
+  @keyframes grid-fade-in {
+    from { opacity: 0; transform: scale(1.04); }
+    to   { opacity: 1; transform: scale(1); }
+  }
+
+  .hero-photo-grid .photo-cell {
+    position: relative;
+    cursor: pointer;
+  }
+
+  /* filter lives on the img only — ::after is never grayscaled */
+  .hero-photo-grid .photo-cell img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    transition: transform 0.5s cubic-bezier(0.16,1,0.3,1), filter 0.4s, opacity 0.4s;
+    filter: grayscale(100%) brightness(0.65);
+    opacity: 0.55;
+  }
+
+  /* color wash overlay */
+  .hero-photo-grid .photo-cell::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: 2;
+    opacity: 0;
+    transition: opacity 0.35s;
+    mix-blend-mode: color;
+    pointer-events: none;
+  }
+
+  /* wild colored border — ::after is outside the filter chain */
+  .hero-photo-grid .photo-cell::after {
+    content: '';
+    position: absolute;
+    inset: -4px;
+    z-index: 3;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.3s;
+  }
+
+  .hero-photo-grid .photo-cell:hover img {
+    filter: grayscale(0%) brightness(1.05);
+    opacity: 1;
+    transform: scale(1.07);
+  }
+
+  .hero-photo-grid .photo-cell:hover::before { opacity: 0.5; }
+
+  .hero-photo-grid .photo-cell:hover::after {
+    opacity: 1;
+    animation: wild-border 3.5s ease-in-out infinite;
+  }
+
+  @keyframes wild-border {
+    0% {
+      box-shadow:
+        -7px -5px 0 5px #a78bfa,
+         5px -3px 0 3px #60a5fa,
+         6px  8px 0 7px #34d399,
+        -4px  6px 0 4px #f472b6,
+        0 0 40px 8px rgba(167,139,250,0.6);
+    }
+    20% {
+      box-shadow:
+        -4px -9px 0 3px #f472b6,
+         9px -5px 0 7px #a78bfa,
+         3px  6px 0 4px #fb923c,
+        -9px  3px 0 6px #34d399,
+        0 0 40px 8px rgba(244,114,182,0.6);
+    }
+    40% {
+      box-shadow:
+        -10px -3px 0 7px #60a5fa,
+          3px -10px 0 4px #e879f9,
+         10px  5px 0 3px #facc15,
+         -3px  10px 0 7px #818cf8,
+        0 0 40px 8px rgba(96,165,250,0.6);
+    }
+    60% {
+      box-shadow:
+        -5px -8px 0 4px #34d399,
+         8px -4px 0 6px #fb923c,
+         4px  8px 0 6px #a78bfa,
+        -8px  4px 0 3px #2dd4bf,
+        0 0 40px 8px rgba(52,211,153,0.6);
+    }
+    80% {
+      box-shadow:
+        -9px -4px 0 6px #e879f9,
+         4px -8px 0 3px #facc15,
+         8px  3px 0 5px #38bdf8,
+        -4px  9px 0 5px #fb923c,
+        0 0 40px 8px rgba(232,121,249,0.6);
+    }
+    100% {
+      box-shadow:
+        -7px -5px 0 5px #a78bfa,
+         5px -3px 0 3px #60a5fa,
+         6px  8px 0 7px #34d399,
+        -4px  6px 0 4px #f472b6,
+        0 0 40px 8px rgba(167,139,250,0.6);
+    }
+  }
+
+  /* assign a unique accent per cell */
+  .photo-cell:nth-child(1)  { --cell-color: #a78bfa; }
+  .photo-cell:nth-child(2)  { --cell-color: #60a5fa; }
+  .photo-cell:nth-child(3)  { --cell-color: #34d399; }
+  .photo-cell:nth-child(4)  { --cell-color: #f472b6; }
+  .photo-cell:nth-child(5)  { --cell-color: #fb923c; }
+  .photo-cell:nth-child(6)  { --cell-color: #818cf8; }
+  .photo-cell:nth-child(7)  { --cell-color: #2dd4bf; }
+  .photo-cell:nth-child(8)  { --cell-color: #e879f9; }
+  .photo-cell:nth-child(9)  { --cell-color: #facc15; }
+  .photo-cell:nth-child(10) { --cell-color: #4ade80; }
+  .photo-cell:nth-child(11) { --cell-color: #f87171; }
+  .photo-cell:nth-child(12) { --cell-color: #38bdf8; }
+
+  /* color overlay tint per cell matches accent */
+  .photo-cell:nth-child(1)::before  { background: #a78bfa; }
+  .photo-cell:nth-child(2)::before  { background: #60a5fa; }
+  .photo-cell:nth-child(3)::before  { background: #34d399; }
+  .photo-cell:nth-child(4)::before  { background: #f472b6; }
+  .photo-cell:nth-child(5)::before  { background: #fb923c; }
+  .photo-cell:nth-child(6)::before  { background: #818cf8; }
+  .photo-cell:nth-child(7)::before  { background: #2dd4bf; }
+  .photo-cell:nth-child(8)::before  { background: #e879f9; }
+  .photo-cell:nth-child(9)::before  { background: #facc15; }
+  .photo-cell:nth-child(10)::before { background: #4ade80; }
+  .photo-cell:nth-child(11)::before { background: #f87171; }
+  .photo-cell:nth-child(12)::before { background: #38bdf8; }
+
+  .hero-photo-grid::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to right, var(--black) 0%, transparent 40%),
+                linear-gradient(to top, var(--black) 0%, transparent 30%);
+    pointer-events: none;
+    z-index: 1;
+  }
+
+  /* ─── HERO TEXT ANIMATIONS ─── */
+  .hero-eyebrow {
+    font-size: 10px;
+    letter-spacing: 4px;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    margin-bottom: 32px;
+    opacity: 0;
+    transform: translateY(12px);
+    animation: hero-in 0.8s ease 0.5s forwards;
+  }
+
+  .hero-headline {
+    font-family: Georgia, 'Times New Roman', serif;
+    font-size: clamp(52px, 7vw, 88px);
+    line-height: 1.04;
+    letter-spacing: -2.5px;
+    color: var(--white);
+    max-width: 780px;
+    margin-bottom: 40px;
+    overflow: hidden;
+  }
+
+  .hero-headline .line {
+    display: block;
+    opacity: 0;
+    transform: translateY(40px);
+  }
+
+  .hero-headline .line:nth-child(1) { animation: hero-line 0.9s cubic-bezier(0.16,1,0.3,1) 0.7s forwards; }
+  .hero-headline .line:nth-child(2) { animation: hero-line 0.9s cubic-bezier(0.16,1,0.3,1) 0.85s forwards; }
+  .hero-headline .line:nth-child(3) { animation: hero-line 0.9s cubic-bezier(0.16,1,0.3,1) 1.0s forwards; }
+
+  @keyframes hero-line {
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .hero-headline em {
+    font-style: italic;
+    color: var(--text-secondary);
+  }
+
+  .hero-sub {
+    font-size: 15px;
+    color: var(--text-secondary);
+    max-width: 460px;
+    line-height: 1.7;
+    margin-bottom: 52px;
+    opacity: 0;
+    transform: translateY(12px);
+    animation: hero-in 0.8s ease 1.15s forwards;
+  }
+
+  @keyframes hero-in {
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* ─── HERO ACTIONS ─── */
+
+  .hero-actions {
+    display: flex;
+    align-items: center;
+    gap: 32px;
+    opacity: 0;
+    transform: translateY(12px);
+    animation: hero-in 0.8s ease 1.35s forwards;
+  }
+
+  .btn-primary {
+    display: inline-block;
+    padding: 14px 36px;
+    border: 1px solid var(--white);
+    color: var(--white);
+    font-size: 11px;
+    letter-spacing: 2.5px;
+    text-transform: uppercase;
+    text-decoration: none;
+    transition: background 0.25s, color 0.25s, box-shadow 0.25s, transform 0.15s;
+    cursor: pointer;
+    background: transparent;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .btn-primary::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: var(--white);
+    transform: translateX(-101%);
+    transition: transform 0.3s cubic-bezier(0.16,1,0.3,1);
+    z-index: -1;
+  }
+
+  .btn-primary:hover::before { transform: translateX(0); }
+  .btn-primary:hover { color: var(--black); box-shadow: 0 0 30px rgba(255,255,255,0.15); }
+  .btn-primary:active { transform: scale(0.97); }
+
+  .hero-note {
+    font-size: 11px;
+    color: var(--text-muted);
+    letter-spacing: 0.5px;
+    transition: color 0.2s;
+  }
+
+  .hero-note:hover { color: var(--text-secondary); }
+
+  .hero-stat-bar {
+    position: absolute;
+    right: 60px;
+    bottom: 100px;
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+    align-items: flex-end;
+    opacity: 0;
+    animation: hero-in 1s ease 1.6s forwards;
+    z-index: 2;
+  }
+
+  .hero-stat {
+    text-align: right;
+    border-right: 1px solid var(--border-light);
+    padding-right: 24px;
+  }
+
+  .hero-stat-num {
+    font-family: Georgia, serif;
+    font-size: 28px;
+    color: var(--white);
+    letter-spacing: -1px;
+    display: block;
+  }
+
+  .hero-stat-label {
+    font-size: 10px;
+    color: var(--text-muted);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+  }
+
+  /* ─── WILD BORDER — reusable hover animation ─── */
+  .wild-hover {
+    transition: box-shadow 0.3s;
+  }
+  .wild-hover:hover {
+    animation: wild-glow 3.5s ease-in-out infinite;
+  }
+  /* subtle variant for smaller/tighter elements */
+  .wild-hover-sm:hover {
+    animation: wild-glow-sm 3s ease-in-out infinite;
+  }
+
+  @keyframes wild-glow {
+    0%   { box-shadow: -6px -4px 0 4px #a78bfa,  5px -3px 0 3px #60a5fa,  5px  7px 0 6px #34d399, -4px  5px 0 4px #f472b6, 0 0 36px 6px rgba(167,139,250,0.45); }
+    20%  { box-shadow: -4px -8px 0 3px #f472b6,   8px -4px 0 6px #a78bfa,  3px  5px 0 4px #fb923c, -8px  3px 0 5px #34d399, 0 0 36px 6px rgba(244,114,182,0.45); }
+    40%  { box-shadow: -9px -3px 0 6px #60a5fa,   3px -9px 0 4px #e879f9,  9px  4px 0 3px #facc15, -3px  9px 0 6px #818cf8, 0 0 36px 6px rgba(96,165,250,0.45); }
+    60%  { box-shadow: -5px -7px 0 4px #34d399,   7px -4px 0 5px #fb923c,  4px  7px 0 5px #a78bfa, -7px  4px 0 3px #2dd4bf, 0 0 36px 6px rgba(52,211,153,0.45); }
+    80%  { box-shadow: -8px -4px 0 5px #e879f9,   4px -7px 0 3px #facc15,  7px  3px 0 4px #38bdf8, -4px  8px 0 5px #fb923c, 0 0 36px 6px rgba(232,121,249,0.45); }
+    100% { box-shadow: -6px -4px 0 4px #a78bfa,  5px -3px 0 3px #60a5fa,  5px  7px 0 6px #34d399, -4px  5px 0 4px #f472b6, 0 0 36px 6px rgba(167,139,250,0.45); }
+  }
+
+  @keyframes wild-glow-sm {
+    0%   { box-shadow: -4px -3px 0 3px #a78bfa,  3px -2px 0 2px #60a5fa,  3px  4px 0 4px #34d399, -3px  3px 0 3px #f472b6, 0 0 20px 4px rgba(167,139,250,0.5); }
+    20%  { box-shadow: -3px -5px 0 2px #f472b6,  5px -3px 0 4px #a78bfa,  2px  3px 0 3px #fb923c, -5px  2px 0 3px #34d399, 0 0 20px 4px rgba(244,114,182,0.5); }
+    40%  { box-shadow: -5px -2px 0 4px #60a5fa,  2px -5px 0 3px #e879f9,  5px  3px 0 2px #facc15, -2px  5px 0 4px #818cf8, 0 0 20px 4px rgba(96,165,250,0.5); }
+    60%  { box-shadow: -3px -4px 0 3px #34d399,  4px -3px 0 3px #fb923c,  3px  4px 0 3px #a78bfa, -4px  3px 0 2px #2dd4bf, 0 0 20px 4px rgba(52,211,153,0.5); }
+    80%  { box-shadow: -5px -3px 0 3px #e879f9,  3px -4px 0 2px #facc15,  4px  2px 0 3px #38bdf8, -3px  5px 0 3px #fb923c, 0 0 20px 4px rgba(232,121,249,0.5); }
+    100% { box-shadow: -4px -3px 0 3px #a78bfa,  3px -2px 0 2px #60a5fa,  3px  4px 0 4px #34d399, -3px  3px 0 3px #f472b6, 0 0 20px 4px rgba(167,139,250,0.5); }
+  }
+
+  /* ─── SECTION BASE ─── */
+  section {
+    border-bottom: 1px solid var(--border);
+  }
+
+  .section-inner {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 100px 60px;
+  }
+
+  .section-label {
+    font-size: 10px;
+    letter-spacing: 4px;
+    text-transform: uppercase;
+    margin-bottom: 60px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    background: linear-gradient(90deg,
+      var(--text-muted) 0%,
+      var(--text-muted) 20%,
+      #a78bfa 35%, #60a5fa 42%, #34d399 50%,
+      var(--text-muted) 65%,
+      var(--text-muted) 100%
+    );
+    background-size: 250% auto;
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    animation: label-shimmer 6s linear infinite;
+  }
+
+  @keyframes label-shimmer {
+    0%   { background-position: 100% center; }
+    100% { background-position: -100% center; }
+  }
+
+  .section-label::after {
+    content: '';
+    display: block;
+    flex: 1;
+    height: 1px;
+    background: linear-gradient(90deg, var(--border), transparent);
+    -webkit-text-fill-color: unset;
+  }
+
+  /* ─── SOCIAL PROOF ─── */
+  .proof-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1px;
+    background: var(--border);
+    border: 1px solid var(--border);
+  }
+
+  .proof-card {
+    background: var(--black);
+    padding: 48px 40px;
+  }
+
+  .proof-quote {
+    font-family: Georgia, serif;
+    font-size: 17px;
+    line-height: 1.6;
+    color: var(--text-primary);
+    margin-bottom: 32px;
+    font-style: italic;
+  }
+
+  .proof-person {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+
+  .proof-avatar {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    object-fit: cover;
+    filter: grayscale(30%);
+    flex-shrink: 0;
+    border: 1px solid var(--border-light);
+  }
+
+  .proof-person-info {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+  }
+
+  .proof-name {
+    font-size: 13px;
+    color: var(--white);
+    font-weight: 500;
+  }
+
+  .proof-title {
+    font-size: 11px;
+    color: var(--text-muted);
+    letter-spacing: 1px;
+  }
+
+  .proof-earnings {
+    margin-top: 24px;
+    padding-top: 24px;
+    border-top: 1px solid var(--border);
+    font-size: 11px;
+    color: var(--text-secondary);
+    letter-spacing: 1px;
+  }
+
+  .proof-earnings strong {
+    color: var(--white);
+    font-family: Georgia, serif;
+    font-size: 20px;
+    display: block;
+    margin-bottom: 2px;
+    letter-spacing: -0.5px;
+  }
+
+  /* ─── HOW IT WORKS ─── */
+  .how-layout {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 80px;
+    align-items: start;
+  }
+
+  .how-headline {
+    font-family: Georgia, serif;
+    font-size: clamp(32px, 4vw, 48px);
+    line-height: 1.15;
+    letter-spacing: -1.5px;
+    color: var(--white);
+    margin-bottom: 24px;
+  }
+
+  .how-sub {
+    font-size: 15px;
+    color: var(--text-secondary);
+    line-height: 1.7;
+  }
+
+  .steps {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+  }
+
+  .step {
+    display: grid;
+    grid-template-columns: 48px 1fr;
+    gap: 24px;
+    padding: 36px 0;
+    border-bottom: 1px solid var(--border);
+    align-items: start;
+  }
+
+  .step:first-child { border-top: 1px solid var(--border); }
+
+  .step-num {
+    font-family: Georgia, serif;
+    font-size: 13px;
+    color: var(--text-muted);
+    padding-top: 3px;
+    transition: color 0.4s, text-shadow 0.4s;
+  }
+
+  .step:hover .step-num {
+    animation: step-color 4s ease-in-out infinite;
+  }
+
+  @keyframes step-color {
+    0%,100% { color: #a78bfa; text-shadow: 0 0 10px rgba(167,139,250,0.7); }
+    25%      { color: #60a5fa; text-shadow: 0 0 10px rgba(96,165,250,0.7); }
+    50%      { color: #34d399; text-shadow: 0 0 10px rgba(52,211,153,0.7); }
+    75%      { color: #f472b6; text-shadow: 0 0 10px rgba(244,114,182,0.7); }
+  }
+
+  .step-title {
+    font-size: 15px;
+    color: var(--white);
+    font-weight: 500;
+    margin-bottom: 8px;
+  }
+
+  .step-desc {
+    font-size: 13px;
+    color: var(--text-secondary);
+    line-height: 1.6;
+  }
+
+  /* ─── WHO IT'S FOR ─── */
+  .profiles-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1px;
+    background: var(--border);
+    border: 1px solid var(--border);
+  }
+
+  .profile-card {
+    background: var(--black);
+    padding: 48px 40px;
+  }
+
+  .profile-icon {
+    width: 40px;
+    height: 40px;
+    border: 1px solid var(--border-light);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 28px;
+    font-size: 18px;
+  }
+
+  .profile-title {
+    font-family: Georgia, serif;
+    font-size: 22px;
+    color: var(--white);
+    letter-spacing: -0.5px;
+    margin-bottom: 12px;
+  }
+
+  .profile-desc {
+    font-size: 13px;
+    color: var(--text-secondary);
+    line-height: 1.7;
+    margin-bottom: 28px;
+  }
+
+  .profile-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .tag {
+    font-size: 10px;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    border: 1px solid var(--border);
+    padding: 4px 10px;
+    transition: color 0.25s, border-color 0.25s, background 0.25s, box-shadow 0.25s;
+    cursor: default;
+  }
+
+  .tag:nth-child(1):hover { color:#a78bfa; border-color:#a78bfa; background:rgba(167,139,250,0.08); box-shadow:0 0 10px rgba(167,139,250,0.3); }
+  .tag:nth-child(2):hover { color:#60a5fa; border-color:#60a5fa; background:rgba(96,165,250,0.08);  box-shadow:0 0 10px rgba(96,165,250,0.3); }
+  .tag:nth-child(3):hover { color:#34d399; border-color:#34d399; background:rgba(52,211,153,0.08);  box-shadow:0 0 10px rgba(52,211,153,0.3); }
+  .tag:nth-child(4):hover { color:#f472b6; border-color:#f472b6; background:rgba(244,114,182,0.08); box-shadow:0 0 10px rgba(244,114,182,0.3); }
+  .tag:nth-child(5):hover { color:#fb923c; border-color:#fb923c; background:rgba(251,146,60,0.08);  box-shadow:0 0 10px rgba(251,146,60,0.3); }
+
+  /* ─── ECONOMICS ─── */
+  .econ-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1px;
+    background: var(--border);
+    border: 1px solid var(--border);
+    margin-bottom: 60px;
+  }
+
+  .econ-card {
+    background: var(--off-black);
+    padding: 48px 40px;
+  }
+
+  .econ-num {
+    font-family: Georgia, serif;
+    font-size: 44px;
+    color: var(--white);
+    letter-spacing: -2px;
+    display: block;
+    margin-bottom: 8px;
+  }
+
+  .econ-label {
+    font-size: 11px;
+    color: var(--text-muted);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    margin-bottom: 16px;
+  }
+
+  .econ-desc {
+    font-size: 13px;
+    color: var(--text-secondary);
+    line-height: 1.6;
+    border-top: 1px solid var(--border);
+    padding-top: 16px;
+  }
+
+  /* ─── BOOKING ─── */
+  .booking-layout {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 80px;
+    align-items: center;
+  }
+
+  .booking-headline {
+    font-family: Georgia, serif;
+    font-size: clamp(36px, 4vw, 52px);
+    line-height: 1.1;
+    letter-spacing: -1.5px;
+    color: var(--white);
+    margin-bottom: 24px;
+  }
+
+  .booking-desc {
+    font-size: 15px;
+    color: var(--text-secondary);
+    line-height: 1.7;
+    margin-bottom: 40px;
+  }
+
+  .booking-checklist {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    margin-bottom: 48px;
+  }
+
+  .booking-checklist li {
+    font-size: 13px;
+    color: var(--text-secondary);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .booking-checklist li::before {
+    content: '—';
+    flex-shrink: 0;
+    background: linear-gradient(90deg, #a78bfa, #60a5fa, #34d399, #f472b6, #fb923c);
+    background-size: 300% auto;
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    animation: dash-color 5s linear infinite;
+  }
+
+  .booking-checklist li:nth-child(2)::before { animation-delay: -1.25s; }
+  .booking-checklist li:nth-child(3)::before { animation-delay: -2.5s; }
+  .booking-checklist li:nth-child(4)::before { animation-delay: -3.75s; }
+
+  @keyframes dash-color {
+    0%   { background-position: 0% center; }
+    100% { background-position: 300% center; }
+  }
+
+  .calendar-mock {
+    background: var(--off-black);
+    border: 1px solid var(--border);
+    padding: 40px;
+  }
+
+  .calendar-header {
+    font-size: 11px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    margin-bottom: 28px;
+    padding-bottom: 20px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .calendar-slots {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    margin-bottom: 28px;
+  }
+
+  .slot {
+    padding: 12px 16px;
+    border: 1px solid var(--border);
+    font-size: 12px;
+    color: var(--text-secondary);
+    cursor: pointer;
+    display: flex;
+    justify-content: space-between;
+    transition: border-color 0.15s, color 0.15s;
+  }
+
+  .slot:hover {
+    border-color: transparent;
+    color: var(--white);
+    background: linear-gradient(var(--off-black), var(--off-black)) padding-box,
+                linear-gradient(90deg, #a78bfa, #60a5fa, #34d399, #f472b6) border-box;
+    border: 1px solid transparent;
+  }
+  .slot.selected {
+    border-color: transparent;
+    color: var(--white);
+    background: linear-gradient(var(--off-black), var(--off-black)) padding-box,
+                linear-gradient(90deg, #a78bfa, #60a5fa, #34d399, #f472b6) border-box;
+    border: 1px solid transparent;
+  }
+
+  .slot-time { letter-spacing: 1px; }
+  .slot-avail { font-size: 10px; letter-spacing: 1px; text-transform: uppercase; color: var(--text-muted); }
+
+  .calendar-cta {
+    width: 100%;
+    padding: 14px;
+    background: var(--white);
+    color: var(--black);
+    border: none;
+    font-size: 11px;
+    letter-spacing: 2.5px;
+    text-transform: uppercase;
+    cursor: pointer;
+    font-family: inherit;
+  }
+
+  /* ─── BILLING FIGURE ─── */
+  .billing-figure {
+    background: linear-gradient(90deg, #fff 0%, #a78bfa 25%, #60a5fa 50%, #34d399 75%, #fff 100%);
+    background-size: 300% auto;
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    animation: billing-shimmer 3s linear infinite;
+  }
+
+  @keyframes billing-shimmer {
+    0%   { background-position: 100% center; }
+    100% { background-position: -100% center; }
+  }
+
+  /* ─── SCROLL REVEAL ─── */
+  .reveal {
+    opacity: 0;
+    transform: translateY(24px);
+    transition: opacity 0.7s ease, transform 0.7s ease;
+  }
+
+  .reveal.visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  /* ─── FOOTER ─── */
+  footer {
+    padding: 60px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .footer-logo {
+    font-family: Georgia, serif;
+    font-size: 16px;
+    color: var(--text-secondary);
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    font-style: italic;
+    letter-spacing: -0.3px;
+  }
+
+  .footer-logo .nav-logo-star {
+    font-size: 11px;
+    opacity: 0.5;
+  }
+
+  .footer-note {
+    font-size: 11px;
+    color: var(--text-muted);
+    letter-spacing: 1px;
+  }
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav id="nav">
+  <div class="nav-logo">
+    <span class="nav-logo-star">✦</span>
+    <div class="nav-logo-text">
+      <span class="nav-logo-name">Aagency</span><span class="nav-logo-tld">.ai</span>
+    </div>
+  </div>
+  <div class="nav-links">
+    <a href="#how-it-works">How it works</a>
+    <a href="#who">Who it's for</a>
+    <a href="#book" class="nav-cta">Book a call</a>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section class="hero" id="hero">
+
+  <!-- Photo mosaic right side -->
+  <div class="hero-photo-grid" id="photoGrid">
+    <div class="photo-cell"><img src="https://images.unsplash.com/photo-1560250097-0b93528c311a?w=300&h=300&fit=crop&crop=face" alt=""></div>
+    <div class="photo-cell"><img src="https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=300&h=300&fit=crop&crop=face" alt=""></div>
+    <div class="photo-cell"><img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=300&h=300&fit=crop&crop=face" alt=""></div>
+    <div class="photo-cell"><img src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=300&h=300&fit=crop&crop=face" alt=""></div>
+    <div class="photo-cell"><img src="https://images.unsplash.com/photo-1580489944761-15a19d654956?w=300&h=300&fit=crop&crop=face" alt=""></div>
+    <div class="photo-cell"><img src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=300&h=300&fit=crop&crop=face" alt=""></div>
+    <div class="photo-cell"><img src="https://images.unsplash.com/photo-1551836022-d5d88e9218df?w=300&h=300&fit=crop&crop=face" alt=""></div>
+    <div class="photo-cell"><img src="https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?w=300&h=300&fit=crop&crop=face" alt=""></div>
+    <div class="photo-cell"><img src="https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=300&h=300&fit=crop&crop=face" alt=""></div>
+    <div class="photo-cell"><img src="https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=300&h=300&fit=crop&crop=face" alt=""></div>
+    <div class="photo-cell"><img src="https://images.unsplash.com/photo-1566492031773-4f4e44671857?w=300&h=300&fit=crop&crop=face" alt=""></div>
+    <div class="photo-cell"><img src="https://images.unsplash.com/photo-1504257432389-52343af06ae3?w=300&h=300&fit=crop&crop=face" alt=""></div>
+  </div>
+
+  <!-- Cursor glow -->
+  <div class="cursor-glow" id="cursorGlow"></div>
+
+  <div class="hero-eyebrow">Invite only · AI-powered agency platform</div>
+  <h1 class="hero-headline">
+    <span class="line">Your expertise</span>
+    <span class="line">is worth more</span>
+    <span class="line">than your <em>time.</em></span>
+  </h1>
+  <p class="hero-sub">Aagency turns senior professionals into agency owners. We find the clients, AI agents do the work, you validate and earn — at a rate your career always deserved.</p>
+  <div class="hero-actions">
+    <a href="#book" class="btn-primary wild-hover-sm">Book a discovery call</a>
+    <span class="hero-note">15 min · No commitment</span>
+  </div>
+  <div class="hero-stat-bar">
+    <div class="hero-stat wild-hover-sm">
+      <span class="hero-stat-num" data-count="4200" data-prefix="$" data-suffix="">$0</span>
+      <span class="hero-stat-label">avg. per hour of owner time</span>
+    </div>
+    <div class="hero-stat wild-hover-sm">
+      <span class="hero-stat-num" data-count="3" data-prefix="" data-suffix=" hrs">0 hrs</span>
+      <span class="hero-stat-label">avg. weekly commitment</span>
+    </div>
+  </div>
+</section>
+
+<!-- SOCIAL PROOF -->
+<section id="proof">
+  <div class="section-inner">
+    <div class="section-label">Early agency owners</div>
+    <div class="proof-grid reveal">
+
+      <div class="proof-card wild-hover">
+        <p class="proof-quote">"I spent 20 years learning what great marketing looks like. Now I just say yes or no — and Aagency handles the rest. I've never felt more leveraged."</p>
+        <div class="proof-person">
+          <img class="proof-avatar" src="https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=88&h=88&fit=crop&crop=face" alt="Sarah M.">
+          <div class="proof-person-info">
+            <span class="proof-name">Sarah M.</span>
+            <span class="proof-title">Former CMO · Series C SaaS</span>
+          </div>
+        </div>
+        <div class="proof-earnings">
+          <strong>$18,400</strong>
+          earned last month · 4.2 hrs invested
+        </div>
+      </div>
+
+      <div class="proof-card wild-hover">
+        <p class="proof-quote">"As a retired IP attorney, I assumed my best earning years were behind me. Three months in, I'm billing more than my peak partner years — without the stress."</p>
+        <div class="proof-person">
+          <img class="proof-avatar" src="https://images.unsplash.com/photo-1560250097-0b93528c311a?w=88&h=88&fit=crop&crop=face" alt="David K.">
+          <div class="proof-person-info">
+            <span class="proof-name">David K.</span>
+            <span class="proof-title">Former Partner · IP Law Firm</span>
+          </div>
+        </div>
+        <div class="proof-earnings">
+          <strong>$31,000</strong>
+          earned last month · 7.5 hrs invested
+        </div>
+      </div>
+
+      <div class="proof-card wild-hover">
+        <p class="proof-quote">"The AI does work that would have taken my team weeks. I review, refine, and approve. My experience is finally priced correctly."</p>
+        <div class="proof-person">
+          <img class="proof-avatar" src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=88&h=88&fit=crop&crop=face" alt="Priya T.">
+          <div class="proof-person-info">
+            <span class="proof-name">Priya T.</span>
+            <span class="proof-title">Former VP Engineering · Unicorn</span>
+          </div>
+        </div>
+        <div class="proof-earnings">
+          <strong>$22,600</strong>
+          earned last month · 5.1 hrs invested
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- HOW IT WORKS -->
+<section id="how-it-works">
+  <div class="section-inner">
+    <div class="section-label">How it works</div>
+    <div class="how-layout reveal">
+      <div>
+        <h2 class="how-headline">Your reputation<br/>opens doors.<br/><em>Agents walk<br/>through them.</em></h2>
+        <p class="how-sub">We handle everything from attracting clients to delivering the work. Your only job is to be the expert you already are — and approve what comes back.</p>
+      </div>
+      <div class="steps">
+        <div class="step">
+          <span class="step-num">01</span>
+          <div>
+            <div class="step-title">We market your agency for you</div>
+            <div class="step-desc">Our agents run your agency's marketing end-to-end — publishing content, building your presence, and pitching to prospects. Every campaign is built around your name, your résumé, and your track record. Clients don't hire a faceless firm. They hire you — the CMO who scaled a unicorn, the lawyer who won the landmark case. The agents make sure the right people know it.</div>
+          </div>
+        </div>
+        <div class="step">
+          <span class="step-num">02</span>
+          <div>
+            <div class="step-title">You meet the client — fully prepared</div>
+            <div class="step-desc">When a prospect is ready to talk, agents prepare everything: a full client brief, their company background, the pain points to address, a tailored proposal, and talking points calibrated to your style. You walk in knowing exactly what to say. Your only job is to be in the room — and make them trust you.</div>
+          </div>
+        </div>
+        <div class="step">
+          <span class="step-num">03</span>
+          <div>
+            <div class="step-title">AI agents deliver the work</div>
+            <div class="step-desc">A coordinated team of AI agents — guided by your professional standards — produces strategies, documents, analyses, and deliverables. Human specialists refine where nuance matters.</div>
+          </div>
+        </div>
+        <div class="step">
+          <span class="step-num">04</span>
+          <div>
+            <div class="step-title">You review, validate, and earn</div>
+            <div class="step-desc">You apply your judgment to approve the work. Every hour you invest is multiplied by AI leverage — billed accordingly.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- THE CORE IDEA -->
+<section id="the-model">
+  <div class="section-inner">
+    <div class="section-label">The model</div>
+
+    <div style="display:grid; grid-template-columns:1fr 1fr; gap:80px; align-items:start; margin-bottom:80px;">
+      <div>
+        <h2 style="font-family:Georgia,serif; font-size:clamp(32px,4vw,48px); line-height:1.15; letter-spacing:-1.5px; color:var(--white); margin-bottom:24px;">Reputation attracts.<br/>AI executes.<br/><em style="font-style:italic;color:var(--text-secondary);">You approve.</em></h2>
+        <p style="font-size:15px; color:var(--text-secondary); line-height:1.75; margin-bottom:20px;">A CMO who led growth at a unicorn doesn't just have skills — they have a track record that clients trust before the first meeting. That reputation is your unfair advantage.</p>
+        <p style="font-size:15px; color:var(--text-secondary); line-height:1.75;">What they've never had is an army of specialists executing beneath them. Aagency gives them that — AI agents doing the heavy lifting, human specialists refining the output, and the expert setting direction and signing off.</p>
+      </div>
+      <div style="display:flex; flex-direction:column; gap:16px;">
+        <div style="border:1px solid var(--border); padding:24px; background:var(--off-black);">
+          <div style="font-size:10px; letter-spacing:3px; color:var(--text-muted); text-transform:uppercase; margin-bottom:8px;">Without Aagency</div>
+          <div style="font-size:14px; color:var(--text-secondary); line-height:1.7;">Your expertise is capped by your hours. You sell time. You hit a ceiling. Every new client means more of you — which you don't have.</div>
+        </div>
+        <div style="border:1px solid var(--white); padding:24px; background:var(--off-black); position:relative;">
+          <div style="position:absolute; top:-1px; right:20px; background:var(--white); color:var(--black); font-size:9px; letter-spacing:2px; text-transform:uppercase; padding:3px 10px;">With Aagency</div>
+          <div style="font-size:14px; color:var(--text-primary); line-height:1.7;">Your expertise is a force multiplier. You set direction once. Dozens of agents execute in parallel. Your 3 hours this week created 300 hours of output.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- THE VISUAL DIAGRAM -->
+    <div style="border:1px solid var(--border); background:var(--off-black); padding:60px; position:relative; overflow:hidden;">
+
+      <div style="font-size:10px; letter-spacing:3px; color:var(--text-muted); text-transform:uppercase; margin-bottom:48px;">A day in the life of a CMO on Aagency</div>
+
+      <!-- CMO ROW -->
+      <div style="display:flex; align-items:center; gap:0; margin-bottom:48px; position:relative;">
+
+        <!-- CMO Card -->
+        <div style="display:flex; flex-direction:column; align-items:center; gap:12px; flex-shrink:0; width:160px;">
+          <div style="position:relative;">
+            <img src="https://images.unsplash.com/photo-1560250097-0b93528c311a?w=160&h=160&fit=crop&crop=face"
+                 style="width:72px; height:72px; border-radius:50%; object-fit:cover; filter:grayscale(20%); border:2px solid var(--white); display:block;" alt="CMO">
+            <div style="position:absolute; bottom:-4px; right:-4px; width:18px; height:18px; background:var(--white); border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:9px;">✓</div>
+          </div>
+          <div style="text-align:center;">
+            <div style="font-size:13px; color:var(--white); font-weight:500;">Marcus L.</div>
+            <div style="font-size:10px; color:var(--text-muted); letter-spacing:1px; margin-top:2px;">Former CMO · Unicorn</div>
+            <div style="margin-top:8px; padding:4px 10px; border:1px solid var(--border-light); font-size:9px; color:var(--text-muted); letter-spacing:1px;">AGENCY OWNER</div>
+          </div>
+        </div>
+
+        <!-- Arrow line right -->
+        <div style="flex:1; height:1px; background:var(--border-light); position:relative; margin:0 16px;">
+          <div style="position:absolute; right:-6px; top:-4px; color:var(--text-muted); font-size:10px;">▶</div>
+          <div style="position:absolute; top:-20px; left:50%; transform:translateX(-50%); font-size:9px; color:var(--text-muted); letter-spacing:2px; white-space:nowrap; text-transform:uppercase;">gives direction</div>
+        </div>
+
+        <!-- Instruction bubble -->
+        <div style="background:var(--black); border:1px solid var(--border-light); padding:16px 20px; border-radius:2px; max-width:300px; flex-shrink:0; font-size:12px; color:var(--text-secondary); line-height:1.6; font-style:italic; position:relative;">
+          <div style="position:absolute; left:-6px; top:50%; transform:translateY(-50%); width:10px; height:10px; background:var(--black); border-left:1px solid var(--border-light); border-bottom:1px solid var(--border-light); transform:translateY(-50%) rotate(45deg);"></div>
+          "Produce a full Q2 brand campaign for EMEA. Competitor analysis first, then 3 creative concepts, social calendar, and performance framework. Client wants a draft by Friday."
+        </div>
+
+        <!-- Arrow line right -->
+        <div style="flex:1; height:1px; background:var(--border-light); position:relative; margin:0 16px;">
+          <div style="position:absolute; right:-6px; top:-4px; color:var(--text-muted); font-size:10px;">▶</div>
+          <div style="position:absolute; top:-20px; left:50%; transform:translateX(-50%); font-size:9px; color:var(--text-muted); letter-spacing:2px; white-space:nowrap; text-transform:uppercase;">dispatched to</div>
+        </div>
+
+        <!-- Time badge -->
+        <div style="flex-shrink:0; text-align:center; width:100px;">
+          <div style="font-family:Georgia,serif; font-size:28px; color:var(--white); letter-spacing:-1px;">12<span style="font-size:14px; color:var(--text-muted);">min</span></div>
+          <div style="font-size:9px; color:var(--text-muted); letter-spacing:2px; text-transform:uppercase; margin-top:2px;">CMO's time</div>
+        </div>
+
+      </div>
+
+      <!-- AGENTS ROW -->
+      <div style="margin-left:160px; padding-left:32px; border-left:1px solid var(--border);">
+
+        <div style="font-size:9px; letter-spacing:3px; text-transform:uppercase; color:var(--text-muted); margin-bottom:20px;">AI Agents — working in parallel</div>
+
+        <div style="display:grid; grid-template-columns:repeat(5,1fr); gap:8px; margin-bottom:24px;">
+
+          <div class="wild-hover-sm" style="background:var(--black); border:1px solid var(--border); padding:16px 12px; text-align:center;">
+            <div style="margin-bottom:10px; display:flex; justify-content:center;">
+              <svg width="22" height="22" viewBox="0 0 22 22" fill="none" stroke="#888" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="9.5" cy="9.5" r="6.5"/>
+                <line x1="14.5" y1="14.5" x2="20" y2="20"/>
+                <line x1="6.5" y1="9.5" x2="12.5" y2="9.5"/>
+                <line x1="9.5" y1="6.5" x2="9.5" y2="12.5"/>
+              </svg>
+            </div>
+            <div style="font-size:10px; color:var(--text-secondary); font-weight:500; margin-bottom:4px;">Research Agent</div>
+            <div style="font-size:9px; color:var(--text-muted);">Competitor landscape analysis</div>
+            <div style="margin-top:10px; display:flex; align-items:center; justify-content:center; gap:4px;">
+              <div style="width:5px;height:5px;border-radius:50%;background:#22c55e;"></div>
+              <span style="font-size:8px;color:#22c55e;letter-spacing:1px;">RUNNING</span>
+            </div>
+          </div>
+
+          <div class="wild-hover-sm" style="background:var(--black); border:1px solid var(--border); padding:16px 12px; text-align:center;">
+            <div style="margin-bottom:10px; display:flex; justify-content:center;">
+              <svg width="22" height="22" viewBox="0 0 22 22" fill="none" stroke="#888" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M3 17.5V19h1.5l9.5-9.5-1.5-1.5L3 17.5z"/>
+                <path d="M16.5 4.5a1.06 1.06 0 0 1 1.5 1.5L16.5 7.5 15 6l1.5-1.5z"/>
+                <line x1="3" y1="21" x2="19" y2="21"/>
+              </svg>
+            </div>
+            <div style="font-size:10px; color:var(--text-secondary); font-weight:500; margin-bottom:4px;">Copy Agent</div>
+            <div style="font-size:9px; color:var(--text-muted);">3 creative concepts + headlines</div>
+            <div style="margin-top:10px; display:flex; align-items:center; justify-content:center; gap:4px;">
+              <div style="width:5px;height:5px;border-radius:50%;background:#22c55e;"></div>
+              <span style="font-size:8px;color:#22c55e;letter-spacing:1px;">RUNNING</span>
+            </div>
+          </div>
+
+          <div class="wild-hover-sm" style="background:var(--black); border:1px solid var(--border); padding:16px 12px; text-align:center;">
+            <div style="margin-bottom:10px; display:flex; justify-content:center;">
+              <svg width="22" height="22" viewBox="0 0 22 22" fill="none" stroke="#888" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="2" y="3" width="18" height="16" rx="1"/>
+                <line x1="2" y1="7" x2="20" y2="7"/>
+                <line x1="7" y1="3" x2="7" y2="7"/>
+                <line x1="15" y1="3" x2="15" y2="7"/>
+                <line x1="6" y1="12" x2="10" y2="12"/>
+                <line x1="6" y1="15" x2="9" y2="15"/>
+              </svg>
+            </div>
+            <div style="font-size:10px; color:var(--text-secondary); font-weight:500; margin-bottom:4px;">Planning Agent</div>
+            <div style="font-size:9px; color:var(--text-muted);">Social calendar EMEA Q2</div>
+            <div style="margin-top:10px; display:flex; align-items:center; justify-content:center; gap:4px;">
+              <div style="width:5px;height:5px;border-radius:50%;background:#22c55e;"></div>
+              <span style="font-size:8px;color:#22c55e;letter-spacing:1px;">RUNNING</span>
+            </div>
+          </div>
+
+          <div class="wild-hover-sm" style="background:var(--black); border:1px solid var(--border); padding:16px 12px; text-align:center;">
+            <div style="margin-bottom:10px; display:flex; justify-content:center;">
+              <svg width="22" height="22" viewBox="0 0 22 22" fill="none" stroke="#888" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="2,16 7,10 11,13 15,7 20,10"/>
+                <line x1="2" y1="19" x2="20" y2="19"/>
+                <line x1="2" y1="3" x2="2" y2="19"/>
+              </svg>
+            </div>
+            <div style="font-size:10px; color:var(--text-secondary); font-weight:500; margin-bottom:4px;">Analytics Agent</div>
+            <div style="font-size:9px; color:var(--text-muted);">Performance framework + KPIs</div>
+            <div style="margin-top:10px; display:flex; align-items:center; justify-content:center; gap:4px;">
+              <div style="width:5px;height:5px;border-radius:50%;background:#f59e0b;"></div>
+              <span style="font-size:8px;color:#f59e0b;letter-spacing:1px;">REVIEWING</span>
+            </div>
+          </div>
+
+          <div class="wild-hover-sm" style="background:var(--black); border:1px solid var(--border); padding:16px 12px; text-align:center;">
+            <div style="margin-bottom:10px; display:flex; justify-content:center;">
+              <svg width="22" height="22" viewBox="0 0 22 22" fill="none" stroke="#888" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="11" cy="9" r="5"/>
+                <circle cx="11" cy="9" r="1.5" fill="#888" stroke="none"/>
+                <path d="M5.5 17.5 C5.5 14.5 8 13 11 13 C14 13 16.5 14.5 16.5 17.5"/>
+                <line x1="8" y1="19" x2="14" y2="19"/>
+              </svg>
+            </div>
+            <div style="font-size:10px; color:var(--text-secondary); font-weight:500; margin-bottom:4px;">Visual Agent</div>
+            <div style="font-size:9px; color:var(--text-muted);">Mood boards + art direction</div>
+            <div style="margin-top:10px; display:flex; align-items:center; justify-content:center; gap:4px;">
+              <div style="width:5px;height:5px;border-radius:50%;background:#6b7280;"></div>
+              <span style="font-size:8px;color:#6b7280;letter-spacing:1px;">QUEUED</span>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- HUMAN REFINERS -->
+        <div style="font-size:9px; letter-spacing:3px; text-transform:uppercase; color:var(--text-muted); margin-bottom:16px; margin-top:8px;">Human specialists — refining output</div>
+
+        <div style="display:flex; gap:8px; margin-bottom:32px;">
+
+          <div style="background:var(--black); border:1px solid var(--border-light); padding:12px 16px; display:flex; align-items:center; gap:12px; flex:1;">
+            <img src="https://images.unsplash.com/photo-1580489944761-15a19d654956?w=60&h=60&fit=crop&crop=face"
+                 style="width:32px;height:32px;border-radius:50%;object-fit:cover;filter:grayscale(30%);flex-shrink:0;" alt="">
+            <div>
+              <div style="font-size:11px;color:var(--text-secondary);">Brand Strategist</div>
+              <div style="font-size:9px;color:var(--text-muted);margin-top:2px;">Refining tone of voice on copy concepts</div>
+            </div>
+          </div>
+
+          <div style="background:var(--black); border:1px solid var(--border-light); padding:12px 16px; display:flex; align-items:center; gap:12px; flex:1;">
+            <img src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=60&h=60&fit=crop&crop=face"
+                 style="width:32px;height:32px;border-radius:50%;object-fit:cover;filter:grayscale(30%);flex-shrink:0;" alt="">
+            <div>
+              <div style="font-size:11px;color:var(--text-secondary);">Media Specialist</div>
+              <div style="font-size:9px;color:var(--text-muted);margin-top:2px;">Validating channel mix for EMEA markets</div>
+            </div>
+          </div>
+
+          <div style="background:var(--black); border:1px solid var(--border-light); padding:12px 16px; display:flex; align-items:center; gap:12px; flex:1;">
+            <img src="https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?w=60&h=60&fit=crop&crop=face"
+                 style="width:32px;height:32px;border-radius:50%;object-fit:cover;filter:grayscale(30%);flex-shrink:0;" alt="">
+            <div>
+              <div style="font-size:11px;color:var(--text-secondary);">Data Analyst</div>
+              <div style="font-size:9px;color:var(--text-muted);margin-top:2px;">Stress-testing the performance model</div>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- OUTPUT + CMO REVIEW -->
+        <div style="border:1px solid var(--border-light); padding:24px 28px; background:var(--black); display:flex; align-items:center; justify-content:space-between; gap:40px;">
+          <div>
+            <div style="font-size:10px; letter-spacing:2px; text-transform:uppercase; color:var(--text-muted); margin-bottom:10px;">Deliverable ready for review</div>
+            <div style="font-size:14px; color:var(--white); margin-bottom:4px;">Q2 EMEA Brand Campaign — Full Package</div>
+            <div style="font-size:12px; color:var(--text-secondary);">42-page strategy deck · 3 creative concepts · 90-day social calendar · KPI framework</div>
+          </div>
+          <div style="display:flex; flex-direction:column; align-items:center; gap:8px; flex-shrink:0;">
+            <div style="font-family:Georgia,serif; font-size:22px; color:var(--white); letter-spacing:-0.5px;">45 min</div>
+            <div style="font-size:9px; color:var(--text-muted); letter-spacing:2px; text-transform:uppercase; text-align:center;">Marcus reviews<br/>&amp; approves</div>
+          </div>
+          <div style="border-left:1px solid var(--border); padding-left:32px; flex-shrink:0;">
+            <div style="font-size:9px; letter-spacing:2px; text-transform:uppercase; color:var(--text-muted); margin-bottom:6px;">Billed to client</div>
+            <div class="billing-figure" style="font-family:Georgia,serif; font-size:32px; letter-spacing:-1px;">$24,000</div>
+            <div style="font-size:10px; color:var(--text-secondary); margin-top:4px;">1 campaign · 1 week · ~1 hr of Marcus's time</div>
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- WHO IT'S FOR -->
+<section id="who">
+  <div class="section-inner">
+    <div class="section-label">Who it's for</div>
+    <div class="profiles-grid reveal">
+
+      <div class="profile-card wild-hover">
+        <div class="profile-icon">⌘</div>
+        <div class="profile-title">C-Suite Executives</div>
+        <p class="profile-desc">You've led functions at scale. You know what good looks like, what failure looks like, and how to navigate the politics of both. That judgment is rare — and Aagency prices it that way.</p>
+        <div class="profile-tags">
+          <span class="tag">CMO</span>
+          <span class="tag">CFO</span>
+          <span class="tag">COO</span>
+          <span class="tag">CTO</span>
+          <span class="tag">CEO</span>
+        </div>
+      </div>
+
+      <div class="profile-card wild-hover">
+        <div class="profile-icon">◈</div>
+        <div class="profile-title">Senior Domain Specialists</div>
+        <p class="profile-desc">20+ years in law, engineering, design, finance, or medicine. You've built expertise that can't be replicated quickly. Aagency deploys that expertise at a scale no individual practice ever could.</p>
+        <div class="profile-tags">
+          <span class="tag">Lawyers</span>
+          <span class="tag">Engineers</span>
+          <span class="tag">Designers</span>
+          <span class="tag">Advisors</span>
+        </div>
+      </div>
+
+      <div class="profile-card" style="grid-column: span 2; background: var(--off-black);">
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 60px; align-items: center;">
+          <div>
+            <div class="profile-title" style="font-size: 28px; margin-bottom: 16px;">You're the right fit if…</div>
+            <ul style="list-style:none; display:flex; flex-direction:column; gap:14px;">
+              <li style="font-size:13px; color: var(--text-secondary); display:flex; gap:12px; align-items:flex-start;"><span style="color:var(--text-muted); flex-shrink:0;">—</span> You have 15+ years of senior professional experience</li>
+              <li style="font-size:13px; color: var(--text-secondary); display:flex; gap:12px; align-items:flex-start;"><span style="color:var(--text-muted); flex-shrink:0;">—</span> You want to earn on your own terms without managing a team</li>
+              <li style="font-size:13px; color: var(--text-secondary); display:flex; gap:12px; align-items:flex-start;"><span style="color:var(--text-muted); flex-shrink:0;">—</span> You're open to AI doing the heavy lifting while you lead</li>
+              <li style="font-size:13px; color: var(--text-secondary); display:flex; gap:12px; align-items:flex-start;"><span style="color:var(--text-muted); flex-shrink:0;">—</span> You value quality over volume</li>
+            </ul>
+          </div>
+          <div>
+            <div style="font-size:10px; letter-spacing:3px; text-transform:uppercase; color:var(--text-muted); margin-bottom:20px;">This is not for you if</div>
+            <ul style="list-style:none; display:flex; flex-direction:column; gap:14px;">
+              <li style="font-size:13px; color: var(--text-muted); display:flex; gap:12px; align-items:flex-start;"><span style="flex-shrink:0;">—</span> You're early in your career and still building expertise</li>
+              <li style="font-size:13px; color: var(--text-muted); display:flex; gap:12px; align-items:flex-start;"><span style="flex-shrink:0;">—</span> You want to run a traditional consulting practice</li>
+              <li style="font-size:13px; color: var(--text-muted); display:flex; gap:12px; align-items:flex-start;"><span style="flex-shrink:0;">—</span> You're uncomfortable with AI-assisted delivery</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- BOOKING -->
+<section id="book">
+  <div class="section-inner">
+    <div class="section-label">Get started</div>
+    <div class="booking-layout reveal">
+      <div>
+        <h2 class="booking-headline">15 minutes.<br/>That's all it takes<br/>to find out.</h2>
+        <p class="booking-desc">Book a short discovery call. We'll tell you exactly what your agency could earn, which clients fit your background, and what the first 30 days look like.</p>
+        <ul class="booking-checklist">
+          <li>No pitch. No pressure. Just clarity.</li>
+          <li>We'll assess fit honestly — not everyone qualifies.</li>
+          <li>You'll leave with a realistic earnings projection.</li>
+          <li>If it's right, onboarding takes less than a week.</li>
+        </ul>
+      </div>
+      <div>
+        <div class="calendar-mock">
+          <div class="calendar-header">Book a discovery call · 15 min</div>
+          <div class="calendar-slots">
+            <div class="slot selected">
+              <span class="slot-time">Mon, Mar 24 · 10:00 AM CET</span>
+              <span class="slot-avail">Available</span>
+            </div>
+            <div class="slot">
+              <span class="slot-time">Mon, Mar 24 · 2:00 PM CET</span>
+              <span class="slot-avail">Available</span>
+            </div>
+            <div class="slot">
+              <span class="slot-time">Tue, Mar 25 · 11:00 AM CET</span>
+              <span class="slot-avail">Available</span>
+            </div>
+            <div class="slot">
+              <span class="slot-time">Wed, Mar 26 · 9:30 AM CET</span>
+              <span class="slot-avail">Available</span>
+            </div>
+          </div>
+          <button class="calendar-cta wild-hover-sm" id="confirmBtn">Confirm this time →</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer id="footer">
+  <div class="footer-logo">
+    <span class="nav-logo-star">✦</span>
+    Aagency<span style="font-style:normal;color:var(--text-muted);font-size:13px;">.ai</span>
+  </div>
+  <div class="footer-note">© 2026 · Invite only · All rights reserved</div>
+</footer>
+
+<script>
+// ── CURSOR GLOW ──
+const hero = document.querySelector('.hero');
+const glow = document.getElementById('cursorGlow');
+let glowColor = '255,255,255';
+
+hero.addEventListener('mousemove', e => {
+  const rect = hero.getBoundingClientRect();
+  glow.style.left = (e.clientX - rect.left) + 'px';
+  glow.style.top  = (e.clientY - rect.top)  + 'px';
+  glow.style.opacity = '1';
+  glow.style.background = `radial-gradient(circle, rgba(${glowColor},0.07) 0%, transparent 65%)`;
+});
+hero.addEventListener('mouseleave', () => glow.style.opacity = '0');
+
+// ── PHOTO CELLS — color glow sync ──
+const colorMap = {
+  1:'255,139,250,0.07', 2:'96,165,250', 3:'52,211,153', 4:'244,114,182',
+  5:'251,146,60', 6:'129,140,248', 7:'45,212,191', 8:'232,121,249',
+  9:'250,204,21', 10:'74,222,128', 11:'248,113,113', 12:'56,189,248'
+};
+document.querySelectorAll('.photo-cell').forEach((cell, i) => {
+  const idx = i + 1;
+  const rgb = colorMap[idx] || '255,255,255';
+  cell.addEventListener('mouseenter', () => {
+    glowColor = rgb;
+    glow.style.width  = '600px';
+    glow.style.height = '600px';
+  });
+  cell.addEventListener('mouseleave', () => {
+    glowColor = '255,255,255';
+    glow.style.width  = '500px';
+    glow.style.height = '500px';
+  });
+});
+
+// ── PHOTO GRID PARALLAX ──
+const grid = document.querySelector('.hero-photo-grid');
+hero.addEventListener('mousemove', e => {
+  const cx = window.innerWidth / 2;
+  const cy = window.innerHeight / 2;
+  const dx = (e.clientX - cx) / cx;
+  const dy = (e.clientY - cy) / cy;
+  grid.style.transform = `translate(${dx * -14}px, ${dy * -10}px) scale(1.02)`;
+});
+hero.addEventListener('mouseleave', () => {
+  grid.style.transform = 'translate(0,0) scale(1)';
+});
+grid.style.transition = 'transform 0.6s cubic-bezier(0.16,1,0.3,1), opacity 0.4s';
+
+// ── STAT COUNTERS ──
+function animateCount(el) {
+  const target = parseInt(el.dataset.count);
+  const prefix = el.dataset.prefix || '';
+  const suffix = el.dataset.suffix || '';
+  const duration = 1800;
+  const start = performance.now();
+  function tick(now) {
+    const elapsed = now - start;
+    const progress = Math.min(elapsed / duration, 1);
+    // ease out expo
+    const eased = progress === 1 ? 1 : 1 - Math.pow(2, -10 * progress);
+    const value = Math.round(eased * target);
+    el.textContent = prefix + value.toLocaleString() + suffix;
+    if (progress < 1) requestAnimationFrame(tick);
+  }
+  requestAnimationFrame(tick);
+}
+
+// Trigger counters after their fade-in animation (1.6s delay + ~0.3s buffer)
+setTimeout(() => {
+  document.querySelectorAll('[data-count]').forEach(animateCount);
+}, 1900);
+
+// ── SCROLL REVEAL ──
+const revealObserver = new IntersectionObserver((entries) => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      entry.target.classList.add('visible');
+      revealObserver.unobserve(entry.target);
+    }
+  });
+}, { threshold: 0.15 });
+
+document.querySelectorAll('.reveal').forEach(el => revealObserver.observe(el));
+
+// ── MAGNETIC CTA BUTTON ──
+const btn = document.querySelector('.btn-primary');
+btn.addEventListener('mousemove', e => {
+  const r = btn.getBoundingClientRect();
+  const dx = e.clientX - (r.left + r.width / 2);
+  const dy = e.clientY - (r.top  + r.height / 2);
+  btn.style.transform = `translate(${dx * 0.18}px, ${dy * 0.22}px)`;
+});
+btn.addEventListener('mouseleave', () => {
+  btn.style.transform = 'translate(0,0)';
+});
+
+// ── SLOT PICKER ──
+document.querySelectorAll('.slot').forEach(slot => {
+  slot.addEventListener('click', () => {
+    document.querySelectorAll('.slot').forEach(s => s.classList.remove('selected'));
+    slot.classList.add('selected');
+  });
+});
+
+// ── CONFIRM BUTTON ──
+const confirmBtn = document.getElementById('confirmBtn');
+confirmBtn.addEventListener('click', () => {
+  confirmBtn.textContent = '✓ Confirmed — check your email';
+  confirmBtn.style.background = '#1a1a1a';
+  confirmBtn.style.color = '#888';
+  confirmBtn.style.pointerEvents = 'none';
+});
+</script>
+</body>
+</html>
