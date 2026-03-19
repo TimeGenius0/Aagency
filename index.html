@@ -1,6 +1,12 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+<script>
+  (function() {
+    const t = localStorage.getItem('theme');
+    if (t === 'light') document.documentElement.setAttribute('data-theme', 'light');
+  })();
+</script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Aagency.ai — Turn your expertise into an agency</title>
@@ -1052,6 +1058,7 @@
   <div class="nav-links">
     <a href="#how-it-works">How it works</a>
     <a href="#who">Who it's for</a>
+    <button class="theme-toggle" id="themeToggle" aria-label="Toggle light/dark mode"></button>
     <a href="#book" class="nav-cta">Book a call</a>
   </div>
 </nav>
