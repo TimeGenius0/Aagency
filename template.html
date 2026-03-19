@@ -1265,9 +1265,18 @@ document.querySelectorAll('.slot').forEach(s => s.addEventListener('click', () =
 // ── CONFIRM ──
 document.getElementById('confirmBtn').addEventListener('click', function() {
   this.textContent = '✓ Confirmed — check your email';
-  this.style.background = '#1a1a1a';
-  this.style.color = '#888';
-  this.style.pointerEvents = 'none';
+  this.classList.add('slot-confirmed');
+});
+
+// Theme toggle
+const themeToggle = document.getElementById('themeToggle');
+const htmlEl = document.documentElement;
+function applyTheme(theme) {
+  htmlEl.setAttribute('data-theme', theme);
+  localStorage.setItem('theme', theme);
+}
+themeToggle.addEventListener('click', () => {
+  applyTheme(htmlEl.getAttribute('data-theme') === 'light' ? 'dark' : 'light');
 });
 </script>
 </body>
