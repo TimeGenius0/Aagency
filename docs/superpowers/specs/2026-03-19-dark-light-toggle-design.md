@@ -1,7 +1,7 @@
 # Dark/Light Mode Toggle — Design Spec
 
 **Date:** 2026-03-19
-**Status:** Approved
+**Status:** Approved (post-review)
 **Files affected:** `index.html`, `template.html`
 
 ---
@@ -19,6 +19,10 @@ Add a pill-switch toggle to the fixed navigation header in both `index.html` and
 - **Dark state:** Dark pill background, knob on the right showing ☀️
 - **Light state:** Light pill background, knob on the left showing 🌙
 - **Element:** `<button class="theme-toggle" id="themeToggle" aria-label="Toggle light/dark mode">`
+
+Note: `index.html` has `<nav>` with no `id`. `template.html` has `<nav id="nav">`. All CSS overrides must use the `nav` tag selector (not `#nav`) to work in both files.
+
+The `.nav-links` flex container uses `gap: 36px`. The toggle (48×26px) will sit inside that gap naturally. No gap adjustment is needed, but verify visually after implementation that spacing around the toggle feels balanced — add a small negative margin if needed.
 
 ---
 
@@ -58,14 +62,30 @@ Existing `:root` variables remain unchanged:
 }
 ```
 
-### Nav background override
+### Hardcoded color overrides (not covered by variables)
 
-The nav backdrop is hardcoded in `#nav` CSS (not a variable), so it needs an explicit override:
+Both files use `rgba(8,8,8,0.92)` for the nav backdrop — not a CSS variable. Override it explicitly:
 
 ```css
-[data-theme="light"] #nav {
+[data-theme="light"] nav {
   background: rgba(250, 248, 245, 0.9);
 }
+```
+
+`template.html` additionally has a `.powered-by` fixed badge with `background: rgba(8,8,8,0.9)`. Override it:
+
+```css
+[data-theme="light"] .powered-by {
+  background: rgba(250, 248, 245, 0.9);
+}
+```
+*(This rule has no effect in `index.html` which has no `.powered-by` element — safe to include in both.)*
+
+Both files also use the hardcoded literal `#111` for hover states (not a CSS variable):
+
+```css
+[data-theme="light"] .method-step:hover { background: #ebe6df; }
+[data-theme="light"] .client-card:hover  { background: #ebe6df; }
 ```
 
 ---
@@ -97,14 +117,19 @@ The nav backdrop is hardcoded in `#nav` CSS (not a variable), so it needs an exp
   font-size: 11px;
   border-radius: 50%;
   background: #f0f0f0;
-  transition: right 0.3s, content 0.3s;
+  transition: right 0.3s;
 }
 [data-theme="light"] .theme-toggle::after {
   content: '🌙';
   right: auto;
   left: 3px;
+  background: #333;
 }
 ```
+
+Notes:
+- `transition: content` is not valid CSS and is omitted.
+- The knob background changes from `#f0f0f0` (readable on dark pill) to `#333` (readable on cream pill) in light mode.
 
 ---
 
@@ -135,15 +160,37 @@ toggle.addEventListener('click', () => {
 });
 ```
 
+### 3. Booking confirm button — inline style fix
+
+Both files set dark colors via `element.style` on the confirm button, which overrides any CSS theme rule:
+
+- `index.html`: `confirmBtn.style.background = '#1a1a1a'; confirmBtn.style.color = '#888';`
+- `template.html`: `this.style.background = '#1a1a1a'; this.style.color = '#888';`
+
+**Fix:** Replace all three inline style assignments (`background`, `color`, `pointerEvents`) with a CSS class `.slot-confirmed`. Remove all `element.style.*` lines and add the class via `element.classList.add('slot-confirmed')` instead. Add light-mode styles for the class:
+
+```css
+.slot-confirmed {
+  background: #1a1a1a;
+  color: #888;
+  pointer-events: none;
+  cursor: default;
+}
+[data-theme="light"] .slot-confirmed {
+  background: #e8e3dc;
+  color: #555;
+}
+```
+
 ---
 
 ## Scope & Constraints
 
 - Dark mode is the default (no `data-theme` attribute = dark)
-- Both `index.html` and `template.html` receive identical changes
+- Both `index.html` and `template.html` receive identical changes unless noted otherwise
 - No new files created — all changes are inline within each HTML file
-- Existing accent colors and animations are unchanged in both modes
-- The nav backdrop blur background is the only hardcoded color that needs an explicit light override — all other colors flow through CSS variables
+- Existing accent colors and shimmer animations are unchanged in both modes (shimmer endpoints use `#fff` which remains visually acceptable on the warm-white background)
+- The cursor glow (`rgba(255,255,255,0.04)`) naturally becomes invisible in light mode — this is acceptable
 
 ---
 
@@ -155,3 +202,8 @@ toggle.addEventListener('click', () => {
 - [ ] No flash of wrong theme on load
 - [ ] All text remains readable in both modes
 - [ ] Toggle pill icon updates correctly (☀️ in dark, 🌙 in light)
+- [ ] Knob contrast is legible in both modes
+- [ ] Nav backdrop is warm-white in light mode (not dark)
+- [ ] `.powered-by` badge (template.html) is warm-white in light mode
+- [ ] Hover states on `.method-step` and `.client-card` use warm tones in light mode
+- [ ] Booking confirm button uses appropriate colors in both modes
