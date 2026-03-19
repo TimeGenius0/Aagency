@@ -973,6 +973,70 @@
     color: var(--text-muted);
     letter-spacing: 1px;
   }
+
+  /* ─── LIGHT MODE ─── */
+  [data-theme="light"] {
+    --black: #faf8f5;
+    --off-black: #f2ede8;
+    --border: #e8e3dc;
+    --border-light: #d8d2c8;
+    --text-primary: #1a1a1a;
+    --text-secondary: #555;
+    --text-muted: #999;
+    --white: #1a1a1a;
+  }
+  [data-theme="light"] nav {
+    background: rgba(250, 248, 245, 0.9);
+  }
+  [data-theme="light"] .powered-by {
+    background: rgba(250, 248, 245, 0.9);
+  }
+
+  /* ─── THEME TOGGLE PILL ─── */
+  .theme-toggle {
+    position: relative;
+    width: 48px;
+    height: 26px;
+    border-radius: 13px;
+    border: 1px solid var(--border-light);
+    background: var(--off-black);
+    cursor: pointer;
+    padding: 0;
+    flex-shrink: 0;
+    transition: background 0.3s, border-color 0.3s;
+  }
+  .theme-toggle::after {
+    content: '☀️';
+    position: absolute;
+    right: 3px;
+    top: 3px;
+    width: 18px;
+    height: 18px;
+    line-height: 18px;
+    text-align: center;
+    font-size: 11px;
+    border-radius: 50%;
+    background: #f0f0f0;
+    transition: right 0.3s;
+  }
+  [data-theme="light"] .theme-toggle::after {
+    content: '🌙';
+    right: auto;
+    left: 3px;
+    background: #333;
+  }
+
+  /* ─── CONFIRM BUTTON THEMED STATE ─── */
+  .slot-confirmed {
+    background: #1a1a1a !important;
+    color: #888 !important;
+    pointer-events: none;
+    cursor: default;
+  }
+  [data-theme="light"] .slot-confirmed {
+    background: #e8e3dc !important;
+    color: #555 !important;
+  }
 </style>
 </head>
 <body>
