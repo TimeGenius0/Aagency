@@ -1,6 +1,12 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+<script>
+  (function() {
+    const t = localStorage.getItem('theme');
+    if (t === 'light') document.documentElement.setAttribute('data-theme', 'light');
+  })();
+</script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>{{PAGE_TITLE}}</title>
@@ -755,6 +761,7 @@
     <a href="#about">About</a>
     <a href="#services">Services</a>
     <a href="#work">Work</a>
+    <button class="theme-toggle" id="themeToggle" aria-label="Toggle light/dark mode"></button>
     <a href="#book" class="nav-cta">Book a call</a>
   </div>
 </nav>
