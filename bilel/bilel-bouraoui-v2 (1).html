@@ -1,0 +1,1376 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pomgrenate — AI Strategy by Bilel Bouraoui</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=DM+Mono:wght@300;400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+:root {
+  /* Base — deep, warm near-black with a hint of burgundy */
+  --ink:      #0C0608;
+  --ink-2:    #130A0C;
+  --ink-3:    #1C1012;
+  --rule:     #2A1A1D;
+  --rule-hi:  #3A2428;
+  --dim:      #6B4A50;
+  --mid:      #9A7A80;
+  --pale:     #D4BFC2;
+  --white:    #F8F0EE;
+  /* Pomegranate rainbow — crimson seeds through ruby, coral, amber */
+  --r1: #C0143C;  /* deep crimson    */
+  --r2: #E8365D;  /* ruby red        */
+  --r3: #F4724A;  /* pomegranate coral */
+  --r4: #F5A623;  /* seed amber      */
+  --r5: #A0155A;  /* dark magenta    */
+  --rainbow: linear-gradient(90deg, #C0143C, #E8365D, #F4724A, #F5A623, #A0155A);
+}
+
+/* ── KEYFRAMES ── */
+@keyframes rb-shift {
+  0%   { background-position: 0%   center; }
+  100% { background-position: 300% center; }
+}
+@keyframes rb-spin {
+  0%   { transform: translate(-50%,-50%) rotate(0deg); }
+  100% { transform: translate(-50%,-50%) rotate(360deg); }
+}
+@keyframes seed-pulse {
+  0%, 100% { opacity: 0.7; transform: scale(1); }
+  50%       { opacity: 1;   transform: scale(1.15); }
+}
+
+/* Utility: animated pomegranate-rainbow text */
+.rb-text {
+  background: linear-gradient(90deg, #C0143C, #E8365D, #F4724A, #F5A623, #A0155A, #C0143C);
+  background-size: 300% auto;
+  -webkit-background-clip: text; background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: rb-shift 6s linear infinite;
+}
+.rb-bar::before {
+  content:''; position:absolute; top:0; left:0; right:0; height:2px;
+  background: var(--rainbow);
+}
+
+body {
+  background: var(--ink);
+  color: var(--pale);
+  font-family: 'DM Sans', sans-serif;
+  font-size: 14px;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  cursor: none;
+}
+
+/* ── CUSTOM CURSOR ── */
+.cur { position:fixed; pointer-events:none; z-index:9999; mix-blend-mode:difference; }
+.cur-dot {
+  width:8px; height:8px; background:var(--white); border-radius:50%;
+  transform:translate(-50%,-50%);
+  transition: transform 0.1s;
+}
+.cur-ring {
+  width:36px; height:36px; border-radius:50%;
+  transform:translate(-50%,-50%);
+  transition: all 0.18s cubic-bezier(0.16,1,0.3,1);
+  background: conic-gradient(from 0deg, #C0143C, #E8365D, #F4724A, #F5A623, #A0155A, #C0143C);
+  -webkit-mask: radial-gradient(farthest-side, transparent calc(100% - 1.5px), white calc(100% - 1.5px));
+  mask: radial-gradient(farthest-side, transparent calc(100% - 1.5px), white calc(100% - 1.5px));
+  animation: rb-spin 4s linear infinite;
+}
+body:has(a:hover) .cur-ring, body:has(button:hover) .cur-ring {
+  width:52px; height:52px;
+}
+
+/* ── NAV ── */
+nav {
+  position:fixed; top:0; left:0; right:0; z-index:100;
+  display:flex; align-items:center; justify-content:space-between;
+  padding:20px 56px;
+  border-bottom:1px solid var(--rule);
+  background:rgba(12,6,8,0.95);
+  backdrop-filter:blur(16px);
+}
+.nav-logo {
+  font-family:'Playfair Display', Georgia, serif;
+  font-size:17px; color:var(--white);
+  display:flex; align-items:center; gap:12px;
+  letter-spacing:-0.2px; text-decoration:none;
+}
+.nav-logo-mark {
+  width:30px; height:34px; flex-shrink:0;
+  transition: transform 0.4s cubic-bezier(0.16,1,0.3,1);
+}
+.nav-logo:hover .nav-logo-mark { transform: scale(1.1); }
+.nav-logo-name { font-style:italic; letter-spacing:-0.3px; }
+.nav-links { display:flex; align-items:center; gap:32px; }
+.nav-links a {
+  font-size:11px; color:var(--dim); text-decoration:none;
+  letter-spacing:2px; text-transform:uppercase;
+  transition:color 0.2s; position:relative;
+}
+.nav-links a:not(.nav-cta):hover { color:var(--pale); }
+.nav-links a:not(.nav-cta)::after {
+  content:''; position:absolute; bottom:-4px; left:0; right:0;
+  height:1px; background: var(--rainbow);
+  transform:scaleX(0); transform-origin:left;
+  transition:transform 0.3s cubic-bezier(0.16,1,0.3,1);
+}
+.nav-links a:not(.nav-cta):hover::after { transform:scaleX(1); }
+.nav-cta {
+  color:var(--ink) !important;
+  padding:9px 22px; letter-spacing:1.5px;
+  background: var(--rainbow); background-size:300% auto;
+  animation: rb-shift 6s linear infinite;
+  transition:opacity 0.2s, transform 0.15s !important;
+}
+.nav-cta:hover { opacity:0.88; transform:translateY(-1px); }
+
+/* ── SHARED ── */
+section { border-bottom:1px solid var(--rule); }
+.inner { max-width:1160px; margin:0 auto; padding:96px 56px; }
+.section-label {
+  font-family:'DM Mono', monospace;
+  font-size:9px; letter-spacing:4px; text-transform:uppercase;
+  margin-bottom:52px;
+  display:flex; align-items:center; gap:20px;
+  background: linear-gradient(90deg, #C0143C, #E8365D, #F4724A, #F5A623, #A0155A, #C0143C);
+  background-size:300% auto;
+  -webkit-background-clip: text; background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: rb-shift 6s linear infinite;
+}
+.section-label::after {
+  content:''; display:block; flex:1; height:1px;
+  background:linear-gradient(90deg, var(--rule-hi), transparent);
+  -webkit-text-fill-color: unset;
+}
+
+/* ── REVEAL ── */
+.reveal { opacity:0; transform:translateY(28px); transition:opacity 0.75s ease, transform 0.75s ease; }
+.reveal.visible { opacity:1; transform:translateY(0); }
+
+/* ── HERO ── */
+.hero {
+  min-height:100vh; padding:160px 56px 80px;
+  display:grid; grid-template-columns:1fr 1fr; gap:80px; align-items:center;
+  border-bottom:1px solid var(--rule);
+  position:relative; overflow:hidden;
+}
+/* Subtle grain texture */
+.hero::before {
+  content:''; position:absolute; inset:0;
+  background:
+    radial-gradient(ellipse 60% 50% at 75% 50%, rgba(192,20,60,0.07) 0%, transparent 70%),
+    url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+  pointer-events:none; z-index:0; opacity:0.8;
+}
+/* Pomegranate vertical accent line */
+.hero::after {
+  content:''; position:absolute; top:20%; left:50%; width:1px; bottom:0;
+  background:linear-gradient(to bottom, transparent, #C0143C 25%, #E8365D 50%, #F4724A 75%, transparent 100%);
+  opacity:0.2; pointer-events:none;
+}
+.hero-left { position:relative; z-index:1; }
+.hero-right { position:relative; z-index:1; display:flex; flex-direction:column; justify-content:center; gap:32px; }
+
+/* nameplate */
+.hero-nameplate {
+  display:flex; align-items:center; gap:12px; margin-bottom:36px;
+  opacity:0; animation:fade-up 0.8s ease 0.2s forwards;
+}
+.nameplate-name {
+  font-family:'DM Mono', monospace; font-size:11px;
+  letter-spacing:2px; text-transform:uppercase;
+  background: var(--rainbow); background-size:300% auto;
+  -webkit-background-clip: text; background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: rb-shift 6s linear infinite;
+}
+.nameplate-sep { color:var(--rule-hi); }
+.nameplate-role { font-size:11px; color:var(--dim); letter-spacing:1px; }
+
+/* headline */
+.hero-headline {
+  font-family:'Playfair Display', Georgia, serif;
+  font-size:clamp(44px,5.5vw,72px);
+  line-height:1.05; letter-spacing:-2px; color:var(--white);
+  margin-bottom:32px;
+}
+.hero-headline .line { display:block; overflow:hidden; }
+.hero-headline .inner-line {
+  display:block; opacity:0; transform:translateY(100%);
+}
+.hero-headline .line:nth-child(1) .inner-line { animation:line-in 0.9s cubic-bezier(0.16,1,0.3,1) 0.5s forwards; }
+.hero-headline .line:nth-child(2) .inner-line { animation:line-in 0.9s cubic-bezier(0.16,1,0.3,1) 0.65s forwards; }
+.hero-headline .line:nth-child(3) .inner-line { animation:line-in 0.9s cubic-bezier(0.16,1,0.3,1) 0.8s forwards; }
+.hero-headline em { font-style:italic; }
+
+@keyframes line-in { to { opacity:1; transform:translateY(0); } }
+@keyframes fade-up { to { opacity:1; transform:translateY(0); } }
+
+/* offer box — the crisp CTA surface */
+.offer-box {
+  border:1px solid var(--rule-hi);
+  padding:36px; position:relative;
+  opacity:0; animation:fade-up 0.8s ease 1s forwards;
+}
+.offer-box::before {
+  content:''; position:absolute; top:0; left:0; right:0; height:2px;
+  background: var(--rainbow);
+}
+.offer-kicker {
+  font-family:'DM Mono', monospace; font-size:9px;
+  letter-spacing:4px; text-transform:uppercase;
+  margin-bottom:20px;
+  background: var(--rainbow); background-size:300% auto;
+  -webkit-background-clip: text; background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: rb-shift 6s linear infinite;
+}
+.offer-title {
+  font-family:'Playfair Display', serif; font-size:22px;
+  color:var(--white); letter-spacing:-0.5px; line-height:1.25;
+  margin-bottom:12px;
+}
+.offer-desc {
+  font-size:13px; color:var(--mid); line-height:1.7;
+  margin-bottom:28px;
+}
+.offer-terms {
+  display:flex; gap:24px; margin-bottom:28px;
+}
+.offer-term {
+  font-family:'DM Mono', monospace; font-size:10px;
+  letter-spacing:1.5px; color:var(--dim);
+  display:flex; align-items:center; gap:8px;
+}
+.offer-term::before {
+  content:'—';
+  background: var(--rainbow); background-size:300% auto;
+  -webkit-background-clip: text; background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: rb-shift 6s linear infinite;
+}
+.btn-rainbow {
+  display:inline-block;
+  background: var(--rainbow); background-size:300% auto;
+  animation: rb-shift 6s linear infinite;
+  color:var(--ink);
+  padding:13px 32px; font-family:'DM Mono', monospace;
+  font-size:10px; letter-spacing:2.5px; text-transform:uppercase;
+  text-decoration:none; cursor:none;
+  transition:opacity 0.2s, transform 0.15s;
+  border:none; width:100%; text-align:center; display:block;
+}
+.btn-rainbow:hover { opacity:0.85; transform:translateY(-2px); }
+.offer-note {
+  margin-top:14px; font-size:11px; color:var(--dim);
+  text-align:center; letter-spacing:0.5px;
+}
+
+/* hero right stats */
+.hero-stats-col {
+  display:flex; flex-direction:column; gap:1px;
+  background:var(--rule); border:1px solid var(--rule);
+  opacity:0; animation:fade-up 0.8s ease 1.2s forwards;
+}
+.hero-stat-item {
+  background:var(--ink); padding:28px 32px;
+  display:grid; grid-template-columns:auto 1fr; gap:20px; align-items:center;
+}
+.hero-stat-num {
+  font-family:'Playfair Display', serif; font-size:40px;
+  color:var(--white); letter-spacing:-2px; line-height:1;
+}
+.hero-stat-label { font-size:11px; color:var(--dim); letter-spacing:1px; line-height:1.4; }
+.hero-stat-label strong { display:block; color:var(--pale); font-weight:500; margin-bottom:2px; }
+
+/* ── TRUST BAR ── */
+.trust-bar {
+  padding:32px 56px;
+  border-bottom:1px solid var(--rule);
+}
+.trust-inner {
+  max-width:1160px; margin:0 auto;
+  display:flex; align-items:center; gap:40px;
+}
+.trust-label {
+  font-family:'DM Mono', monospace; font-size:9px;
+  letter-spacing:3px; text-transform:uppercase; color:var(--dim);
+  white-space:nowrap; flex-shrink:0;
+}
+.trust-rule { height:1px; background:var(--rule); flex-shrink:0; width:24px; }
+.trust-companies {
+  display:flex; flex-wrap:wrap; align-items:center; gap:0;
+}
+.trust-company {
+  font-family:'Playfair Display', serif; font-size:13px;
+  color:var(--dim); font-style:italic;
+  padding:6px 20px; border-left:1px solid var(--rule);
+  transition:color 0.2s; white-space:nowrap;
+}
+.trust-company:first-child { border-left:none; }
+.trust-company.notable { color:var(--pale); font-size:14px; }
+.trust-company:hover { color:var(--pale); }
+
+/* ── ABOUT PHOTO ── */
+.about-photo-wrap {
+  width:100%; aspect-ratio:3/4; position:relative;
+  overflow:hidden; border:1px solid var(--rule);
+}
+.about-photo {
+  width:100%; height:100%; object-fit:cover; object-position:center top;
+  display:block;
+  filter:
+    grayscale(30%)
+    sepia(25%)
+    saturate(0.85)
+    brightness(0.82)
+    contrast(1.08)
+    hue-rotate(-8deg);
+  transition: filter 0.5s ease;
+}
+.about-photo-wrap:hover .about-photo {
+  filter:
+    grayscale(15%)
+    sepia(20%)
+    saturate(0.95)
+    brightness(0.88)
+    contrast(1.05)
+    hue-rotate(-8deg);
+}
+/* Crimson color wash overlay */
+.about-photo-wrap::after {
+  content:'';
+  position:absolute; inset:0;
+  background: linear-gradient(
+    160deg,
+    rgba(192,20,60,0.12) 0%,
+    rgba(160,21,90,0.08) 40%,
+    rgba(12,6,8,0.35) 100%
+  );
+  pointer-events:none; z-index:1;
+  mix-blend-mode: multiply;
+}
+/* Bottom fade into page */
+.about-photo-wrap::before {
+  content:'';
+  position:absolute; bottom:0; left:0; right:0; height:35%;
+  background: linear-gradient(to bottom, transparent, var(--ink));
+  pointer-events:none; z-index:2;
+}
+
+/* ── ABOUT ── */
+.about-grid {
+  display:grid; grid-template-columns:240px 1fr; gap:80px; align-items:start;
+}
+.about-monogram {
+  width:100%; aspect-ratio:3/4; background:var(--ink-2);
+  border:1px solid var(--rule); display:flex; align-items:center;
+  justify-content:center; position:relative; overflow:hidden;
+}
+.about-monogram::after {
+  content:''; position:absolute; inset:0;
+  background:linear-gradient(135deg, rgba(192,20,60,0.08) 0%, rgba(244,114,74,0.04) 50%, transparent 60%);
+}
+.monogram-text {
+  font-family:'Playfair Display', serif; font-size:72px;
+  color:var(--rule-hi); font-style:italic; letter-spacing:-4px;
+  user-select:none; line-height:1;
+}
+.about-caption { margin-top:20px; padding-top:20px; border-top:1px solid var(--rule); }
+.about-name { font-family:'Playfair Display', serif; font-size:20px; color:var(--white); letter-spacing:-0.3px; margin-bottom:4px; }
+.about-title { font-family:'DM Mono', monospace; font-size:9px; color:var(--dim); letter-spacing:2px; text-transform:uppercase; }
+
+.about-headline {
+  font-family:'Playfair Display', serif;
+  font-size:clamp(28px,3vw,40px); color:var(--white);
+  letter-spacing:-1px; line-height:1.15; margin-bottom:28px;
+}
+.about-headline em {
+  font-style:italic;
+  background: var(--rainbow); background-size:300% auto;
+  -webkit-background-clip: text; background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: rb-shift 6s linear infinite;
+}
+.about-bio { display:flex; flex-direction:column; gap:16px; margin-bottom:40px; }
+.about-bio p { font-size:14px; color:var(--mid); line-height:1.8; }
+.about-bio p strong { color:var(--pale); font-weight:500; }
+.credentials {
+  display:grid; grid-template-columns:repeat(4,1fr); gap:1px;
+  background:var(--rule); border:1px solid var(--rule);
+}
+.cred {
+  background:var(--ink); padding:24px 20px; text-align:center;
+  transition:background 0.2s;
+}
+.cred:hover { background:var(--ink-2); }
+.cred-val {
+  font-family:'Playfair Display', serif; font-size:32px;
+  letter-spacing:-1px; display:block; margin-bottom:4px;
+  background: var(--rainbow); background-size:300% auto;
+  -webkit-background-clip: text; background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: rb-shift 6s linear infinite;
+}
+.cred-label { font-family:'DM Mono', monospace; font-size:9px; color:var(--dim); letter-spacing:2px; text-transform:uppercase; line-height:1.4; }
+
+/* ── SERVICES ── */
+.services-grid {
+  display:grid; grid-template-columns:1fr 1fr;
+  gap:1px; background:var(--rule); border:1px solid var(--rule);
+}
+.svc {
+  background:var(--ink); padding:48px 40px;
+  display:flex; flex-direction:column; gap:20px;
+  transition:background 0.2s;
+}
+.svc:hover { background:var(--ink-2); }
+.svc.full-width { grid-column: span 2; }
+.svc-num {
+  font-family:'DM Mono', monospace; font-size:10px; letter-spacing:2px;
+  background: var(--rainbow); background-size:300% auto;
+  -webkit-background-clip: text; background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: rb-shift 6s linear infinite;
+}
+.svc-title {
+  font-family:'Playfair Display', serif; font-size:22px;
+  color:var(--white); letter-spacing:-0.3px; line-height:1.2;
+}
+.svc-desc { font-size:13px; color:var(--mid); line-height:1.75; flex:1; }
+.svc-list { list-style:none; display:flex; flex-direction:column; gap:8px; padding-top:20px; border-top:1px solid var(--rule); }
+.svc-list li { font-size:12px; color:var(--dim); display:flex; gap:12px; }
+.svc-list li::before {
+  content:'—';
+  background: var(--rainbow); background-size:300% auto;
+  -webkit-background-clip: text; background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: rb-shift 6s linear infinite;
+  flex-shrink:0;
+}
+.svc-outcome {
+  font-family:'DM Mono', monospace; font-size:10px;
+  letter-spacing:1px;
+  padding-top:16px; border-top:1px solid var(--rule);
+  background: var(--rainbow); background-size:300% auto;
+  -webkit-background-clip: text; background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: rb-shift 6s linear infinite;
+}
+
+/* ── CASE STUDIES ── */
+.cases-grid {
+  display:grid; grid-template-columns:repeat(3,1fr);
+  gap:1px; background:var(--rule); border:1px solid var(--rule);
+}
+.case {
+  background:var(--ink-2); padding:48px 36px;
+  display:flex; flex-direction:column; gap:24px;
+  transition:background 0.2s;
+}
+.case:hover { background:var(--ink-3); }
+.case-tag { font-family:'DM Mono', monospace; font-size:9px; letter-spacing:3px; text-transform:uppercase; color:var(--dim); }
+.case-num {
+  font-family:'Playfair Display', serif; font-size:56px;
+  color:var(--white); letter-spacing:-3px; line-height:1;
+  background: var(--rainbow); background-size:300% auto;
+  -webkit-background-clip: text; background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: rb-shift 6s linear infinite;
+}
+.case-metric {
+  font-family:'DM Mono', monospace; font-size:9px; letter-spacing:2px; text-transform:uppercase;
+  color:var(--mid); margin-top:4px;
+}
+.case-divider { height:1px; background:var(--rule); }
+.case-challenge-label { font-family:'DM Mono', monospace; font-size:9px; letter-spacing:2px; text-transform:uppercase; color:var(--dim); margin-bottom:8px; }
+.case-text { font-size:13px; color:var(--mid); line-height:1.7; }
+.case-approach {
+  border-left:2px solid var(--rule-hi); padding-left:16px;
+  position:relative;
+}
+.case-approach::before {
+  content:''; position:absolute; top:0; left:-2px; bottom:0; width:2px;
+  background: var(--rainbow);
+  opacity:0.6;
+}
+.case-approach-label {
+  font-family:'DM Mono', monospace; font-size:9px; letter-spacing:2px; text-transform:uppercase; margin-bottom:8px;
+  background: var(--rainbow); background-size:300% auto;
+  -webkit-background-clip: text; background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: rb-shift 6s linear infinite;
+}
+
+/* ── IMPACT ── */
+.impact-grid {
+  display:grid; grid-template-columns:repeat(4,1fr);
+  gap:1px; background:var(--rule); border:1px solid var(--rule);
+}
+.impact-cell { background:var(--ink); padding:48px 36px; }
+.impact-num {
+  font-family:'Playfair Display', serif; font-size:52px;
+  letter-spacing:-2.5px; display:block; margin-bottom:4px;
+  background: var(--rainbow); background-size:300% auto;
+  -webkit-background-clip: text; background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: rb-shift 6s linear infinite;
+}
+.impact-label {
+  font-family:'DM Mono', monospace; font-size:9px; letter-spacing:2px; text-transform:uppercase; margin-bottom:16px;
+  background: var(--rainbow); background-size:300% auto;
+  -webkit-background-clip: text; background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: rb-shift 6s linear infinite;
+}
+.impact-desc { font-size:13px; color:var(--mid); line-height:1.6; padding-top:16px; border-top:1px solid var(--rule); }
+
+/* ── WHY DIFFERENT ── */
+.why-grid { display:grid; grid-template-columns:1fr 1fr; gap:80px; align-items:start; }
+.why-headline {
+  font-family:'Playfair Display', serif; font-size:clamp(30px,3.5vw,44px);
+  line-height:1.15; letter-spacing:-1.5px; color:var(--white); margin-bottom:24px;
+}
+.why-headline em { font-style:italic; background: var(--rainbow); background-size:300% auto; -webkit-background-clip:text; background-clip:text; -webkit-text-fill-color:transparent; animation: rb-shift 6s linear infinite; }
+.why-sub { font-size:15px; color:var(--mid); line-height:1.8; }
+.diff-points { display:flex; flex-direction:column; gap:1px; background:var(--rule); border:1px solid var(--rule); }
+.diff-point {
+  background:var(--ink); padding:28px 32px;
+  display:grid; grid-template-columns:24px 1fr; gap:20px;
+  align-items:start; transition:background 0.2s;
+}
+.diff-point:hover { background:var(--ink-2); }
+.diff-icon {
+  font-family:'DM Mono', monospace; font-size:12px; margin-top:1px;
+  background: var(--rainbow); background-size:300% auto;
+  -webkit-background-clip: text; background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: rb-shift 6s linear infinite;
+}
+.diff-title { font-size:13px; color:var(--white); font-weight:500; margin-bottom:6px; }
+.diff-desc { font-size:12px; color:var(--mid); line-height:1.65; }
+
+/* ── TESTIMONIALS ── */
+.proof-grid {
+  display:grid; grid-template-columns:repeat(3,1fr);
+  gap:1px; background:var(--rule); border:1px solid var(--rule);
+}
+.proof-card { background:var(--ink); padding:48px 40px; }
+.proof-quote {
+  font-family:'Playfair Display', serif; font-size:15px; line-height:1.7;
+  color:var(--pale); margin-bottom:32px; font-style:italic;
+}
+.proof-quote::before {
+  content:'❝ ';
+  font-style:normal; font-size:20px;
+  background: var(--rainbow); background-size:300% auto;
+  -webkit-background-clip: text; background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: rb-shift 6s linear infinite;
+}
+.proof-person { display:flex; align-items:center; gap:16px; }
+.proof-init {
+  width:40px; height:40px; border-radius:50%; flex-shrink:0;
+  border:1px solid var(--rule-hi); background:var(--ink-2);
+  display:flex; align-items:center; justify-content:center;
+  font-family:'Playfair Display', serif; font-size:16px;
+  font-style:italic;
+  background: var(--rainbow), var(--ink-2);
+  background-clip: text, padding-box;
+  -webkit-background-clip: text, padding-box;
+  -webkit-text-fill-color: transparent;
+  background-size: 300% auto, auto;
+  animation: rb-shift 6s linear infinite;
+}
+.proof-name { font-size:13px; color:var(--white); font-weight:500; display:block; }
+.proof-title { font-family:'DM Mono', monospace; font-size:9px; color:var(--dim); letter-spacing:1.5px; text-transform:uppercase; }
+.proof-result {
+  margin-top:24px; padding-top:24px; border-top:1px solid var(--rule);
+  font-size:11px; color:var(--mid); letter-spacing:0.5px;
+}
+.proof-result strong {
+  font-family:'Playfair Display', serif; font-size:20px;
+  display:block; margin-bottom:2px; letter-spacing:-0.5px;
+  background: var(--rainbow); background-size:300% auto;
+  -webkit-background-clip: text; background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: rb-shift 6s linear infinite;
+}
+
+/* ── WHO THIS IS FOR ── */
+.client-grid {
+  display:grid; grid-template-columns:repeat(3,1fr);
+  gap:1px; background:var(--rule); border:1px solid var(--rule);
+}
+.client-card {
+  background:var(--ink-2); padding:40px 32px;
+  transition:background 0.2s;
+}
+.client-card:hover { background:var(--ink-3); }
+.client-icon {
+  font-size:18px; margin-bottom:20px; display:block;
+  background: var(--rainbow); background-size:300% auto;
+  -webkit-background-clip: text; background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: rb-shift 6s linear infinite;
+}
+.client-type { font-family:'Playfair Display', serif; font-size:17px; color:var(--white); margin-bottom:12px; line-height:1.3; }
+.client-desc { font-size:13px; color:var(--mid); line-height:1.7; }
+
+/* ── BOOKING ── */
+.booking-layout { display:grid; grid-template-columns:1fr 1fr; gap:80px; align-items:center; }
+.booking-headline {
+  font-family:'Playfair Display', serif;
+  font-size:clamp(34px,4vw,52px); line-height:1.1;
+  letter-spacing:-1.5px; color:var(--white); margin-bottom:20px;
+}
+.booking-headline em {
+  font-style:italic;
+  background: var(--rainbow); background-size:300% auto;
+  -webkit-background-clip: text; background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: rb-shift 6s linear infinite;
+}
+.booking-desc { font-size:14px; color:var(--mid); line-height:1.75; margin-bottom:36px; }
+.booking-check { list-style:none; display:flex; flex-direction:column; gap:12px; }
+.booking-check li { font-size:13px; color:var(--mid); display:flex; gap:14px; align-items:flex-start; }
+.booking-check li::before {
+  content:'—';
+  background: var(--rainbow); background-size:300% auto;
+  -webkit-background-clip: text; background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: rb-shift 6s linear infinite;
+  flex-shrink:0; font-family:'DM Mono', monospace;
+}
+
+.cal-box { background:var(--ink-2); border:1px solid var(--rule-hi); padding:40px; position:relative; }
+.cal-box::before {
+  content:''; position:absolute; top:0; left:0; right:0; height:2px;
+  background: var(--rainbow);
+}
+.cal-head {
+  font-family:'DM Mono', monospace; font-size:9px; letter-spacing:3px;
+  text-transform:uppercase; margin-bottom:24px;
+  padding-bottom:20px; border-bottom:1px solid var(--rule);
+  background: var(--rainbow); background-size:300% auto;
+  -webkit-background-clip: text; background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: rb-shift 6s linear infinite;
+}
+.cal-slots { display:flex; flex-direction:column; gap:2px; margin-bottom:24px; }
+.slot {
+  padding:13px 16px; font-size:12px;
+  color:var(--mid); cursor:none;
+  display:flex; justify-content:space-between; align-items:center;
+  transition:color 0.15s, background 0.15s;
+  border:1px solid var(--rule);
+  position:relative;
+}
+.slot:hover, .slot.selected {
+  color:var(--white);
+  background: linear-gradient(var(--ink-2), var(--ink-2)) padding-box,
+              var(--rainbow) border-box;
+  border:1px solid transparent;
+}
+.slot-time { letter-spacing:0.5px; }
+.slot-badge {
+  font-family:'DM Mono', monospace; font-size:9px;
+  letter-spacing:1.5px; text-transform:uppercase;
+  background: var(--rainbow); background-size:300% auto;
+  -webkit-background-clip: text; background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: rb-shift 6s linear infinite;
+}
+.cal-cta {
+  width:100%; padding:14px; color:var(--ink);
+  border:none; font-family:'DM Mono', monospace;
+  font-size:10px; letter-spacing:2.5px; text-transform:uppercase;
+  cursor:none; transition:opacity 0.2s, transform 0.15s;
+  background: var(--rainbow); background-size:300% auto;
+  animation: rb-shift 6s linear infinite;
+}
+.cal-cta:hover { opacity:0.85; transform:translateY(-1px); }
+
+/* ── FOOTER ── */
+footer {
+  padding:48px 56px;
+  display:flex; justify-content:space-between; align-items:center;
+}
+.footer-logo {
+  font-family:'Playfair Display', serif; font-size:18px;
+  color:var(--pale); font-style:italic; display:flex; align-items:center; gap:10px;
+}
+.footer-logo span {
+  background: var(--rainbow); background-size:300% auto;
+  -webkit-background-clip: text; background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: rb-shift 6s linear infinite;
+  font-style:normal;
+}
+.footer-note { font-family:'DM Mono', monospace; font-size:10px; color:var(--dim); letter-spacing:1.5px; }
+
+/* ── POWERED BY ── */
+.powered-by {
+  position:fixed; bottom:24px; right:24px;
+  font-family:'DM Mono', monospace; font-size:9px;
+  letter-spacing:2px; text-transform:uppercase;
+  color:var(--dim); text-decoration:none;
+  border:1px solid var(--rule); padding:6px 12px;
+  background:rgba(12,6,8,0.92); backdrop-filter:blur(8px);
+  z-index:99; transition:color 0.2s, border-color 0.2s;
+}
+.powered-by:hover { color:var(--pale); border-color:var(--rule-hi); }
+
+/* ── METHOD ── */
+.method-intro { margin-bottom:64px; }
+.method-headline {
+  font-family:'Playfair Display', serif;
+  font-size:clamp(28px,3vw,40px); color:var(--white);
+  letter-spacing:-1px; line-height:1.2; margin-bottom:16px;
+}
+.method-headline em {
+  font-style:italic;
+  background: var(--rainbow); background-size:300% auto;
+  -webkit-background-clip: text; background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: rb-shift 6s linear infinite;
+}
+.method-sub { font-size:14px; color:var(--mid); line-height:1.75; max-width:600px; }
+.method-steps {
+  display:grid; grid-template-columns:repeat(3,1fr);
+  gap:1px; background:var(--rule); border:1px solid var(--rule);
+}
+.method-step { background:var(--ink); padding:40px 36px; }
+.method-step-num {
+  font-family:'DM Mono', monospace; font-size:11px; letter-spacing:2px;
+  display:block; margin-bottom:16px;
+  background: var(--rainbow); background-size:300% auto;
+  -webkit-background-clip: text; background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: rb-shift 6s linear infinite;
+}
+.method-step-title { font-family:'Playfair Display', serif; font-size:18px; color:var(--white); margin-bottom:12px; }
+.method-step-desc { font-size:13px; color:var(--mid); line-height:1.7; }
+
+/* ── RESPONSIVE ── */
+@media (max-width: 900px) {
+  nav { padding:18px 24px; }
+  .nav-links a:not(.nav-cta) { display:none; }
+  .hero { grid-template-columns:1fr; gap:48px; padding:140px 24px 64px; }
+  .hero::after { display:none; }
+  .inner { padding:64px 24px; }
+  .trust-bar { padding:24px; }
+  .trust-inner { flex-wrap:wrap; gap:16px; }
+  .about-grid { grid-template-columns:1fr; gap:48px; }
+  .services-grid, .proof-grid, .impact-grid, .client-grid { grid-template-columns:1fr; }
+  .svc.full-width { grid-column: span 1; }
+  .cases-grid { grid-template-columns:1fr; }
+  .booking-layout, .why-grid { grid-template-columns:1fr; gap:48px; }
+  .method-steps { grid-template-columns:1fr; }
+  .credentials { grid-template-columns:repeat(2,1fr); }
+  footer { flex-direction:column; gap:16px; text-align:center; padding:32px 24px; }
+  .hero-stat-item { grid-template-columns:1fr; gap:8px; }
+  body { cursor:auto; }
+  .cur { display:none; }
+}
+</style>
+</head>
+<body>
+
+<!-- CURSOR -->
+<div class="cur" id="curDot"><div class="cur-dot"></div></div>
+<div class="cur" id="curRing"><div class="cur-ring"></div></div>
+
+<!-- NAV -->
+<nav>
+  <a href="#hero" class="nav-logo">
+    <svg class="nav-logo-mark" viewBox="0 0 48 54" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <linearGradient id="fruitFill" x1="20%" y1="10%" x2="80%" y2="90%">
+          <stop offset="0%" stop-color="#E8365D"/>
+          <stop offset="60%" stop-color="#C0143C"/>
+          <stop offset="100%" stop-color="#8A0E2A"/>
+        </linearGradient>
+        <linearGradient id="crownFill" x1="30%" y1="0%" x2="70%" y2="100%">
+          <stop offset="0%" stop-color="#C0143C"/>
+          <stop offset="100%" stop-color="#7A0A22"/>
+        </linearGradient>
+      </defs>
+
+      <!-- Crown — 5 pointed sepals, same style as reference -->
+      <path d="
+        M24 18
+        C22 18 20 17 19 16
+        L17 10 L20 13 L21 8 L24 12 L27 8 L28 13 L31 10 L29 16
+        C28 17 26 18 24 18Z
+      " fill="url(#crownFill)"/>
+
+      <!-- Fruit body — wide rounded teardrop, heavier at base, flat at neck -->
+      <path d="
+        M24 18
+        C18 18 11 22 8 29
+        C5 36 7 44 13 49
+        C16 51.5 20 53 24 53
+        C28 53 32 51.5 35 49
+        C41 44 43 36 40 29
+        C37 22 30 18 24 18Z
+      " fill="url(#fruitFill)"/>
+
+      <!-- Subtle neck indent where crown meets body -->
+      <ellipse cx="24" cy="18.5" rx="5.5" ry="1.5" fill="#8A0E2A" opacity="0.5"/>
+    </svg>
+    <span class="nav-logo-name">Pomgrenate</span>
+  </a>
+  <div class="nav-links">
+    <a href="#about">About</a>
+    <a href="#services">Strategy</a>
+    <a href="#work">Work</a>
+    <a href="#book" class="nav-cta">Book a call</a>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section class="hero" id="hero">
+  <div class="hero-left">
+    <div class="hero-nameplate">
+      <span class="nameplate-name">Bilel Bouraoui</span>
+      <span class="nameplate-sep">·</span>
+      <span class="nameplate-role">Founder of Pomgrenate · Former Principal PM, Mailchimp · 15 Years at the AI Frontier</span>
+    </div>
+
+    <h1 class="hero-headline">
+      <span class="line"><span class="inner-line">The AI strategy</span></span>
+      <span class="line"><span class="inner-line">that makes your company</span></span>
+      <span class="line"><span class="inner-line">harder to <em class="rb-text">compete with</em></span></span>
+    </h1>
+
+    <div class="offer-box">
+      <div class="offer-kicker">The engagement</div>
+      <div class="offer-title">Enterprise-grade AI strategy.<br/>Without the enterprise consultancy.</div>
+      <div class="offer-desc">Pomgrenate works with CEOs and leadership teams to design and execute the full AI transformation of their business — across strategy, products, operations, risk, and talent. The output is a durable competitive advantage, not a slide deck. Bilel leads every engagement personally.</div>
+      <div class="offer-terms">
+        <span class="offer-term">6–12 week engagements</span>
+        <span class="offer-term">Senior-only delivery</span>
+        <span class="offer-term">By referral only</span>
+      </div>
+      <a href="#book" class="btn-rainbow">Book a 15-min discovery call</a>
+      <p class="offer-note">Intake is selective — not every inquiry becomes an engagement</p>
+    </div>
+  </div>
+
+  <div class="hero-right">
+    <div class="hero-stats-col">
+      <div class="hero-stat-item">
+        <div class="hero-stat-num">$10M+</div>
+        <div class="hero-stat-label">
+          <strong>New revenue identified</strong>
+          AI strategy engagement at a $18B company — surfaced and validated in under 90 days
+        </div>
+      </div>
+      <div class="hero-stat-item">
+        <div class="hero-stat-num">6×</div>
+        <div class="hero-stat-label">
+          <strong>Enterprise pipeline growth</strong>
+          Full company repositioning around AI — from stalled consumer motion to market leader
+        </div>
+      </div>
+      <div class="hero-stat-item">
+        <div class="hero-stat-num">2×</div>
+        <div class="hero-stat-label">
+          <strong>Acquired at premium valuation</strong>
+          AI-native transformation of a fintech product — from commodity to category winner
+        </div>
+      </div>
+      <div class="hero-stat-item">
+        <div class="hero-stat-num">15+</div>
+        <div class="hero-stat-label">
+          <strong>Years building at the frontier</strong>
+          From early ML systems to agentic AI — operator experience across four companies and three continents
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- TRUST BAR -->
+<div class="trust-bar" id="trust">
+  <div class="trust-inner">
+    <span class="trust-label">Led at · Advised</span>
+    <div class="trust-rule"></div>
+    <div class="trust-companies">
+      <span class="trust-company notable">Intuit Mailchimp</span>
+      <span class="trust-company notable">Schibsted</span>
+      <span class="trust-company notable">Sequans Communications</span>
+      <span class="trust-company">Series A–C Startups</span>
+      <span class="trust-company">Fintech & Banking</span>
+      <span class="trust-company">Enterprise AI Teams</span>
+    </div>
+  </div>
+</div>
+
+<!-- ABOUT -->
+<section id="about">
+  <div class="inner">
+    <div class="section-label">The strategist</div>
+    <div class="about-grid reveal">
+      <div>
+        <div class="about-photo-wrap">
+          <img class="about-photo" src="bilel-photo.jpg" alt="Bilel Bouraoui"/>
+        </div>
+        <div class="about-caption">
+          <div class="about-name">Bilel Bouraoui</div>
+          <div class="about-title">Founder, Pomgrenate · Former Principal PM, Mailchimp</div>
+        </div>
+      </div>
+      <div>
+        <h2 class="about-headline">The strategist companies call<br/>when AI <em>actually matters</em></h2>
+        <div class="about-bio">
+          <p>Bilel Bouraoui has spent 15 years at the intersection of AI, competitive strategy, and company building — from <strong>founding AI companies that were acquired</strong> to leading AI transformation at Intuit Mailchimp, one of the world's largest marketing platforms, reporting directly to the CPO.</p>
+          <p>He operates at the level where strategy becomes structure: <strong>how a company reorganizes itself around AI</strong>, how leadership decides where to move first, how boards get convinced, and how execution actually follows intent.</p>
+          <p>Pomgrenate works with a deliberately small number of companies. Every engagement is a genuine partnership — with Bilel's full attention, judgment, and accountability behind it.</p>
+        </div>
+        <div class="credentials">
+          <div class="cred"><span class="cred-val">$10M+</span><span class="cred-label">new revenue identified</span></div>
+          <div class="cred"><span class="cred-val">6×</span><span class="cred-label">pipeline growth driven</span></div>
+          <div class="cred"><span class="cred-val">4</span><span class="cred-label">companies built</span></div>
+          <div class="cred"><span class="cred-val">40+</span><span class="cred-label">person teams led</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- SERVICES — 5 PILLARS -->
+<section id="services">
+  <div class="inner">
+    <div class="section-label">The AI Strategy framework</div>
+    <div class="services-grid reveal">
+      <div class="svc">
+        <div class="svc-num">01</div>
+        <div class="svc-title">Company Transformation for the Age of AI</div>
+        <div class="svc-desc">Most companies treat AI as a feature. The ones that win treat it as a new operating model. Bilel works with your leadership team to design the full transformation — vision, sequencing, org design, and the narrative to align your board, investors, and team behind it.</div>
+        <ul class="svc-list">
+          <li>AI-native vision and company strategy</li>
+          <li>Transformation roadmap with sequenced milestones</li>
+          <li>Board and investor narrative</li>
+          <li>Competitive positioning in the AI era</li>
+        </ul>
+        <div class="svc-outcome">→ A company-wide AI transformation plan your leadership can execute</div>
+      </div>
+      <div class="svc">
+        <div class="svc-num">02</div>
+        <div class="svc-title">Product, Services & Marketing Transformation</div>
+        <div class="svc-desc">AI changes what you build, how you sell it, and how customers experience it. Bilel redesigns your product roadmap around AI-native capabilities — recommendation, personalization, agentic automation — and aligns your marketing and service delivery to match.</div>
+        <ul class="svc-list">
+          <li>AI product roadmap and PMF strategy</li>
+          <li>Agentic and LLM product architecture</li>
+          <li>AI-native marketing and GTM design</li>
+          <li>Customer experience transformation</li>
+        </ul>
+        <div class="svc-outcome">→ Products and marketing rebuilt for compounding AI advantage</div>
+      </div>
+      <div class="svc">
+        <div class="svc-num">03</div>
+        <div class="svc-title">Process & Operations Transformation</div>
+        <div class="svc-desc">The biggest efficiency gains from AI are rarely in the product — they are in the operations behind it. Bilel maps your highest-cost, highest-volume processes and designs the AI automation layer that removes friction, accelerates decisions, and scales without headcount.</div>
+        <ul class="svc-list">
+          <li>AI process audit and opportunity mapping</li>
+          <li>Agentic workflow and automation design</li>
+          <li>Cross-functional AI implementation plan</li>
+          <li>Measurement framework for operational AI</li>
+        </ul>
+        <div class="svc-outcome">→ Operational leverage through AI — measurable, defensible, scalable</div>
+      </div>
+      <div class="svc">
+        <div class="svc-num">04</div>
+        <div class="svc-title">AI Risk Management</div>
+        <div class="svc-desc">Companies that move fast on AI without governance frameworks face regulatory exposure, reputational risk, and product failures that erode trust. Bilel established GenAI Trust & Safety and evaluation standards across Mailchimp's 18,000-person organization — compliance-aware, not compliance-theatre.</div>
+        <ul class="svc-list">
+          <li>GenAI evaluation and quality framework</li>
+          <li>Trust & Safety guardrail architecture</li>
+          <li>Regulatory and compliance AI playbook</li>
+          <li>AI incident response design</li>
+        </ul>
+        <div class="svc-outcome">→ AI governance your legal, product, and eng teams can operate with confidence</div>
+      </div>
+      <div class="svc">
+        <div class="svc-num">05</div>
+        <div class="svc-title">AI Hiring & Talent Optimization</div>
+        <div class="svc-desc">AI changes who you need, what roles look like, and how teams should be structured. Bilel helps you define the AI-era org — which roles to hire, which to augment, how to upskill existing talent, and how to build a culture that compounds on AI capability over time.</div>
+        <ul class="svc-list">
+          <li>AI-era org design and role definition</li>
+          <li>Hiring strategy for AI-native talent</li>
+          <li>Team upskilling and capability building</li>
+          <li>PM and leadership coaching for AI</li>
+        </ul>
+        <div class="svc-outcome">→ A team and culture built to compound on AI — not be disrupted by it</div>
+      </div>
+      <!-- Wide card: full engagement -->
+      <div class="svc full-width" style="border-top:2px solid transparent; background-image:linear-gradient(var(--ink),var(--ink)),var(--rainbow); background-origin:border-box; background-clip:padding-box,border-box;">
+        <div class="svc-num">Full Engagement</div>
+        <div class="svc-title">End-to-End AI Strategy Sprint</div>
+        <div class="svc-desc">All five pillars. One coherent strategy. Delivered in 6–12 weeks with Bilel leading every session. The output is a complete AI transformation playbook — ready to present to your board and execute with your team the following quarter.</div>
+        <ul class="svc-list">
+          <li>Leadership workshops across all five strategy dimensions</li>
+          <li>Company-specific AI transformation roadmap</li>
+          <li>Prioritized quick-win and long-term initiative plan</li>
+          <li>Ongoing advisory through execution phase</li>
+        </ul>
+        <div class="svc-outcome">→ The AI strategy your company needs to lead — not catch up</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- WHO THIS IS FOR -->
+<section id="clients">
+  <div class="inner">
+    <div class="section-label">Who this is for</div>
+    <div class="client-grid reveal">
+      <div class="client-card">
+        <span class="client-icon">⌘</span>
+        <div class="client-type">CEOs & Founders Facing the AI Inflection</div>
+        <div class="client-desc">You know AI will reshape your industry. You are not sure where to start, what to prioritize, or how to move fast without getting it wrong. You need a senior partner who has built AI companies and led AI transformation at enterprise scale — not a generalist framework.</div>
+      </div>
+      <div class="client-card">
+        <span class="client-icon">◈</span>
+        <div class="client-type">CPOs & CTOs Scaling AI Across the Business</div>
+        <div class="client-desc">You have AI in the product but the rest of the company — operations, marketing, hiring, risk — has not caught up. You need someone who can see across functions and design a transformation that actually holds together at scale.</div>
+      </div>
+      <div class="client-card">
+        <span class="client-icon">◎</span>
+        <div class="client-type">Leadership Teams Preparing for the Next Round</div>
+        <div class="client-desc">Your investors are asking what your AI strategy is. You need an answer that is specific, credible, and executable — not a slide deck full of buzzwords. Bilel has built the AI strategies that have driven acquisitions and Series B+ rounds.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CASE STUDIES -->
+<section id="work">
+  <div class="inner">
+    <div class="section-label">Selected transformations</div>
+    <div class="cases-grid reveal">
+      <div class="case">
+        <div class="case-tag">Global MarTech Platform · $18B Revenue</div>
+        <div>
+          <div class="case-num">$10M+</div>
+          <div class="case-metric">New revenue opportunity — validated in 90 days</div>
+        </div>
+        <div class="case-divider"></div>
+        <div>
+          <div class="case-challenge-label">The strategic challenge</div>
+          <div class="case-text">Intuit Mailchimp had reached the ceiling of a batch-and-blast model. To compete in the next era, it needed to become an AI-native marketing platform — a transformation that touched product, operations, trust infrastructure, and the company's entire view of what it was selling.</div>
+        </div>
+        <div class="case-approach">
+          <div class="case-approach-label">The transformation</div>
+          <div class="case-text">Bilel led the AI strategy across the full business: agentic campaign execution, intelligent content generation, and a recommendation engine that surfaced a $10M+ annual revenue opportunity within a single quarter. In parallel, he designed the GenAI governance framework adopted across the 18,000-person organization — enabling the company to move fast on AI without exposing itself to regulatory or reputational risk.</div>
+        </div>
+      </div>
+      <div class="case">
+        <div class="case-tag">AI Fintech Startup · Acquired</div>
+        <div>
+          <div class="case-num">Acquired</div>
+          <div class="case-metric">From commodity to category winner — strategic exit secured</div>
+        </div>
+        <div class="case-divider"></div>
+        <div>
+          <div class="case-challenge-label">The strategic challenge</div>
+          <div class="case-text">A financial services startup had a product that worked but a business that wasn't winning. Its core technology — a rule-based recommendation engine — was structurally incapable of differentiation. Without a fundamental rethink of the AI layer, the company was on a path to irrelevance in an increasingly intelligent market.</div>
+        </div>
+        <div class="case-approach">
+          <div class="case-approach-label">The transformation</div>
+          <div class="case-text">Bilel co-founded and led the strategic repositioning: rebuilding the core product around a continuously learning ML recommendation engine, reframing the value proposition around measurable revenue outcomes, and executing a go-to-market motion that demonstrated those outcomes at scale. The result was an 82% improvement in the company's primary revenue metric — and a full acquisition by Craft Foundry.</div>
+        </div>
+      </div>
+      <div class="case">
+        <div class="case-tag">EdTech Platform · YC-Backed</div>
+        <div>
+          <div class="case-num">6×</div>
+          <div class="case-metric">Enterprise pipeline growth — Series B followed</div>
+        </div>
+        <div class="case-divider"></div>
+        <div>
+          <div class="case-challenge-label">The strategic challenge</div>
+          <div class="case-text">ParagonOne was a well-funded company growing in the wrong direction. Its consumer-facing model was generating noise but not revenue. The question wasn't what feature to build next — it was whether the company had the right product, the right customer, and the right motion to survive.</div>
+        </div>
+        <div class="case-approach">
+          <div class="case-approach-label">The transformation</div>
+          <div class="case-text">Bilel led the full strategic pivot: repositioning the platform around enterprise ESG mandates, rebuilding the AI and data layer to serve the Chief Sustainability Officer, and designing a new go-to-market motion aligned to that buyer. Enterprise pipeline grew sixfold. The company went from a stalled consumer story to a credible enterprise AI platform — and closed its Series B.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- IMPACT -->
+<section id="impact">
+  <div class="inner">
+    <div class="section-label">Track record</div>
+    <div class="impact-grid reveal">
+      <div class="impact-cell">
+        <span class="impact-num">$10M+</span>
+        <div class="impact-label">New revenue identified</div>
+        <div class="impact-desc">AI strategy engagement at a global $18B platform — a single initiative surfaced a validated $10M+ annual revenue opportunity within the first quarter.</div>
+      </div>
+      <div class="impact-cell">
+        <span class="impact-num">6×</span>
+        <div class="impact-label">Enterprise pipeline growth</div>
+        <div class="impact-desc">Full strategic repositioning of a YC-backed company around AI — from a stalled consumer motion to an enterprise market leader in one cycle. Series B followed.</div>
+      </div>
+      <div class="impact-cell">
+        <span class="impact-num">2×</span>
+        <div class="impact-label">Companies taken to exit</div>
+        <div class="impact-desc">AI-led transformation converted two portfolio companies from strategic also-rans into acquisition targets — both acquired at premium valuations.</div>
+      </div>
+      <div class="impact-cell">
+        <span class="impact-num">15+</span>
+        <div class="impact-label">Years at the frontier</div>
+        <div class="impact-desc">From early ML infrastructure to agentic AI systems — deep operator experience across four companies, three continents, and every stage of growth.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- WHY DIFFERENT -->
+<section id="why">
+  <div class="inner">
+    <div class="section-label">Why different</div>
+    <div class="why-grid reveal">
+      <div>
+        <h2 class="why-headline">Not a consultancy.<br/>Not a framework.<br/><em>A strategic partner.</em></h2>
+        <p class="why-sub">The large consultancies sell process. Pomgrenate sells judgment — the kind that comes from having been the person accountable for the outcome, at companies where getting it wrong meant existential risk.</p>
+      </div>
+      <div class="diff-points">
+        <div class="diff-point">
+          <span class="diff-icon">⌘</span>
+          <div>
+            <div class="diff-title">Operator credibility, not advisory distance</div>
+            <div class="diff-desc">Bilel has founded AI companies from zero and led AI strategy inside an $18B public company. He brings the perspective of someone who has been accountable for outcomes — not someone who observed them from the outside.</div>
+          </div>
+        </div>
+        <div class="diff-point">
+          <span class="diff-icon">◈</span>
+          <div>
+            <div class="diff-title">Strategy that reaches the architecture</div>
+            <div class="diff-desc">An MSc in Electrical Engineering, hands-on ML systems experience, and deep LLM product work means Bilel's strategic recommendations are grounded in what is technically achievable — not divorced from it.</div>
+          </div>
+        </div>
+        <div class="diff-point">
+          <span class="diff-icon">◎</span>
+          <div>
+            <div class="diff-title">Whole-company transformation, not feature advice</div>
+            <div class="diff-desc">Most AI advisors improve a product. Pomgrenate transforms a company — across strategy, products, operations, risk, and talent. The only AI advantage worth building is one the whole organization can sustain.</div>
+          </div>
+        </div>
+        <div class="diff-point">
+          <span class="diff-icon">⬡</span>
+          <div>
+            <div class="diff-title">Deliberate scarcity</div>
+            <div class="diff-desc">Pomgrenate takes very few engagements. This is not a positioning choice — it is how quality is protected. Every client gets Bilel's direct attention, judgment, and time. There is no leverage model here.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- HOW IT WORKS -->
+<section id="method">
+  <div class="inner">
+    <div class="section-label">How an engagement works</div>
+    <div class="method-intro reveal">
+      <h2 class="method-headline">Thinking at the speed of <em>the decision</em></h2>
+      <p class="method-sub">Most strategy work moves slowly because research and synthesis are bottlenecks. Pomgrenate uses AI to compress those bottlenecks — so Bilel's judgment operates at the pace the market demands, not the pace a traditional engagement allows.</p>
+    </div>
+    <div class="method-steps reveal">
+      <div class="method-step">
+        <span class="method-step-num">01 — Discovery & Diagnostic</span>
+        <div class="method-step-title">Read the whole company</div>
+        <div class="method-step-desc">Before any strategy is designed, Bilel develops a clear picture of where the company stands across all five transformation dimensions. The diagnostic surfaces not just gaps, but the specific leverage points where AI can create durable, defensible advantage.</div>
+      </div>
+      <div class="method-step">
+        <span class="method-step-num">02 — Strategy Design</span>
+        <div class="method-step-title">Build the case for transformation</div>
+        <div class="method-step-desc">The strategy is designed to be acted on, not admired. Every recommendation is sequenced, prioritized by impact, and built to survive the scrutiny of a board, an investor, and an engineering team simultaneously. Deliverables are ready to present and ready to execute.</div>
+      </div>
+      <div class="method-step">
+        <span class="method-step-num">03 — Execution Partnership</span>
+        <div class="method-step-title">Stay until the momentum holds</div>
+        <div class="method-step-desc">The value of a strategy is in its execution. Bilel remains embedded through the critical early phase — making decisions, removing blockers, and ensuring the transformation gains the organizational momentum it needs to outlast the engagement.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- TESTIMONIALS -->
+<section id="testimonials">
+  <div class="inner">
+    <div class="section-label">Client feedback</div>
+    <div class="proof-grid reveal">
+      <div class="proof-card">
+        <p class="proof-quote">Most strategy engagements produce analysis. This one produced decisions. Within a quarter our board had a clear AI story, our product had a new direction, and our revenue model had a path it didn't have before.</p>
+        <div class="proof-person">
+          <div class="proof-init">K</div>
+          <div>
+            <span class="proof-name">Karim B.</span>
+            <span class="proof-title">CEO · Series B Fintech</span>
+          </div>
+        </div>
+        <div class="proof-result">
+          <strong>Strategic exit secured</strong>
+          acquired at premium valuation post-transformation
+        </div>
+      </div>
+      <div class="proof-card">
+        <p class="proof-quote">What surprised me was how quickly the thinking reached every level of the company — not just the product roadmap, but how we hire, how we manage risk, how we talk to investors. It changed the whole frame.</p>
+        <div class="proof-person">
+          <div class="proof-init">P</div>
+          <div>
+            <span class="proof-name">Priya M.</span>
+            <span class="proof-title">CTO · Growth-Stage SaaS</span>
+          </div>
+        </div>
+        <div class="proof-result">
+          <strong>Board confidence secured</strong>
+          AI governance and product strategy aligned in one engagement
+        </div>
+      </div>
+      <div class="proof-card">
+        <p class="proof-quote">We came in with a product problem. We left with a company strategy. Six months later our enterprise pipeline had grown sixfold and we had closed our Series B. I don't think that happens without this work.</p>
+        <div class="proof-person">
+          <div class="proof-init">S</div>
+          <div>
+            <span class="proof-name">Sarah L.</span>
+            <span class="proof-title">CEO · YC-Backed EdTech</span>
+          </div>
+        </div>
+        <div class="proof-result">
+          <strong>Series B closed</strong>
+          6× enterprise pipeline growth, one strategic cycle
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- BOOKING -->
+<section id="book">
+  <div class="inner">
+    <div class="section-label">Get started</div>
+    <div class="booking-layout reveal">
+      <div>
+        <h2 class="booking-headline">The conversation<br/>that starts a <em>transformation</em></h2>
+        <p class="booking-desc">The discovery call is a working session — not a sales call. Bilel comes prepared, asks the questions that matter, and you leave with a clear view of where AI represents the highest-leverage opportunity for your company. We take very few engagements. The call determines fit on both sides.</p>
+        <ul class="booking-check">
+          <li>Strategic diagnostic across all five transformation dimensions</li>
+          <li>The highest-leverage AI opportunity for your company identified</li>
+          <li>Engagement structure and scope defined</li>
+          <li>One strategic move you can make before we begin</li>
+        </ul>
+      </div>
+      <div>
+        <div class="cal-box">
+          <div class="cal-head">Book a discovery call · 15 min · No commitment</div>
+          <div class="cal-slots">
+            <div class="slot selected">
+              <span class="slot-time">Mon, Mar 24 · 10:00 AM</span>
+              <span class="slot-badge">Available</span>
+            </div>
+            <div class="slot">
+              <span class="slot-time">Mon, Mar 24 · 2:00 PM</span>
+              <span class="slot-badge">Available</span>
+            </div>
+            <div class="slot">
+              <span class="slot-time">Tue, Mar 25 · 11:00 AM</span>
+              <span class="slot-badge">Available</span>
+            </div>
+            <div class="slot">
+              <span class="slot-time">Wed, Mar 26 · 9:30 AM</span>
+              <span class="slot-badge">Available</span>
+            </div>
+          </div>
+          <button class="cal-cta" id="confirmBtn">Confirm this time →</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-logo">
+    <svg width="20" height="22" viewBox="0 0 48 54" fill="none" xmlns="http://www.w3.org/2000/svg" style="opacity:0.5">
+      <path d="M24 18 C22 18 20 17 19 16 L17 10 L20 13 L21 8 L24 12 L27 8 L28 13 L31 10 L29 16 C28 17 26 18 24 18Z" fill="#8A0E2A"/>
+      <path d="M24 18 C18 18 11 22 8 29 C5 36 7 44 13 49 C16 51.5 20 53 24 53 C28 53 32 51.5 35 49 C41 44 43 36 40 29 C37 22 30 18 24 18Z" fill="#C0143C"/>
+      <ellipse cx="24" cy="18.5" rx="5.5" ry="1.5" fill="#6A0818" opacity="0.5"/>
+    </svg>
+    Pomgrenate<span> · AI Strategy</span>
+  </div>
+  <div class="footer-note">© 2026 · Bilel Bouraoui · All rights reserved</div>
+</footer>
+
+<a href="https://aagency.ai" class="powered-by" target="_blank">Powered by Aagency.ai</a>
+
+<script>
+// ── CURSOR ──
+const dot = document.getElementById('curDot');
+const ring = document.getElementById('curRing');
+let mx=0,my=0,rx=0,ry=0;
+document.addEventListener('mousemove', e => { mx=e.clientX; my=e.clientY; dot.style.left=mx+'px'; dot.style.top=my+'px'; });
+(function loop(){ rx+=(mx-rx)*0.12; ry+=(my-ry)*0.12; ring.style.left=rx+'px'; ring.style.top=ry+'px'; requestAnimationFrame(loop); })();
+
+// ── SCROLL REVEAL ──
+const obs = new IntersectionObserver(entries => {
+  entries.forEach(e => { if(e.isIntersecting){ e.target.classList.add('visible'); obs.unobserve(e.target); } });
+},{ threshold:0.1 });
+document.querySelectorAll('.reveal').forEach(el => obs.observe(el));
+
+// ── SLOT PICKER ──
+document.querySelectorAll('.slot').forEach(s => s.addEventListener('click', () => {
+  document.querySelectorAll('.slot').forEach(x => x.classList.remove('selected'));
+  s.classList.add('selected');
+}));
+
+// ── CONFIRM ──
+document.getElementById('confirmBtn').addEventListener('click', function(){
+  this.textContent = '✓ Confirmed — check your email';
+  this.style.background = 'var(--rule-hi)';
+  this.style.color = 'var(--dim)';
+  this.style.pointerEvents = 'none';
+});
+
+// ── COUNTER ANIMATION ──
+function animateCount(el) {
+  const raw = el.getAttribute('data-count');
+  if (!raw) return;
+  const isFloat = raw.includes('.');
+  const target = parseFloat(raw);
+  const prefix = el.dataset.prefix||'';
+  const suffix = el.dataset.suffix||'';
+  const dur = 1800;
+  const start = performance.now();
+  (function tick(now){
+    const p = Math.min((now-start)/dur,1);
+    const e2 = p===1?1:1-Math.pow(2,-10*p);
+    const val = e2*target;
+    el.textContent = prefix+(isFloat?val.toFixed(1):Math.round(val).toLocaleString())+suffix;
+    if(p<1) requestAnimationFrame(tick);
+  })(start);
+}
+const countObs = new IntersectionObserver(entries=>{
+  entries.forEach(e=>{ if(e.isIntersecting){ animateCount(e.target); countObs.unobserve(e.target); } });
+},{threshold:0.5});
+document.querySelectorAll('[data-count]').forEach(el=>countObs.observe(el));
+</script>
+</body>
+</html>
