@@ -27,12 +27,13 @@ linkedin_agent/
 ```
 state/
 ├── .auth/              # Playwright saved auth session (gitignored)
-├── current-cycle.txt   # Single source of truth for active cycle number (e.g. "1")
+├── current-cycle.txt   # Always holds the in-progress cycle number (e.g. "1" while posting cycle-01)
 ├── raw-posts.txt       # Manual fallback if scraper fails (see format below)
 ├── strategy.md         # Current content strategy (overwritten each cycle)
 ├── strategy-cycle-01.md  # Archived strategy from cycle 1 (never overwritten)
 ├── strategy-cycle-02.md  # Archived strategy from cycle 2
 ├── cycle-01/
+│   ├── slot-plan.json    # Pre-built 24-post plan; persists for resume-on-interrupt (committed)
 │   ├── week-01-post-1.md
 │   ├── week-01-post-2.md
 │   ├── week-01-post-3.md
@@ -72,10 +73,12 @@ Steps:
 python run.py generate
 ```
 
-1. Reads `state/current-cycle.txt` → let this value be `N` (the completed cycle)
+`current-cycle.txt` always holds the in-progress cycle. `generate` advances it.
+
+1. Reads `state/current-cycle.txt` → N (the currently active, in-progress cycle)
 2. Reads `state/strategy.md`
-3. Checks `state/cycle-{N}/review.md` — if it exists, passes it to `generator.py` as additional context; if it does not exist (user skipped review), proceeds with `strategy.md` only
-4. Creates `state/cycle-{N+1}/`, writes `N+1` to `current-cycle.txt`
+3. Checks `state/cycle-{N}/review.md` — if it exists, passes it to `generator.py` as additional context; if not, proceeds with `strategy.md` only
+4. Writes `N+1` to `current-cycle.txt`, creates `state/cycle-{N+1}/`
 5. `generator.py` generates 24 posts → writes to `state/cycle-{N+1}/`
 
 ### `review` — 8-Week Re-evaluation
@@ -84,7 +87,7 @@ python run.py generate
 python run.py review
 ```
 
-1. Reads `state/current-cycle.txt` → let this value be `N` (the cycle being reviewed)
+1. Reads `state/current-cycle.txt` → N (the in-progress cycle whose posts are being reviewed)
 2. `scraper.py` attempts to re-scrape the user's LinkedIn profile with headed Playwright (human-speed delays) → returns list of `{text_snippet, date, likes, comments}`. **If scraping fails:** prints a warning, skips engagement data for all posts, and proceeds to step 4 with engagement stats listed as "unavailable" — ratings-only review is still valid.
 3. `reviewer.py` matches scraped posts to local `.md` files by comparing `published_text_snippet` frontmatter (first 80 chars). Unmatched local posts show `likes: ?, comments: ?`.
 4. `reviewer.py` CLI loop: for each post in cycle `N`, prints topic + engagement stats (or "unavailable"), prompts `Rate this post 1–5 (or s to skip): `. Ratings written to `state/cycle-{N}/review.md` incrementally — session is resumable on restart (already-rated posts skipped).
