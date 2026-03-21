@@ -1,0 +1,8 @@
+anthropic
+playwright
+openclaw
+duckduckgo-search
+python-dotenv
+beautifulsoup4
+pytest
+pytest-mock
