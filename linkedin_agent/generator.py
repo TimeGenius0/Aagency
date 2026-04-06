@@ -6,12 +6,45 @@ import re
 from pathlib import Path
 
 
-_CONTENT_MIX = {
-    "contrarian": 10,        # ~40% of 24
-    "behind-the-scenes": 7,  # ~30%
-    "how-to": 5,             # ~20%
-    "story": 2,              # ~10%
+_DEFAULT_CONTENT_MIX = {
+    "contrarian": 10,
+    "behind-the-scenes": 7,
+    "how-to": 5,
+    "story": 2,
 }
+
+
+def _parse_content_mix(strategy_md: str) -> dict[str, int]:
+    """
+    Parse the Content Mix section from strategy.md.
+    Expects lines like "- hook_type: N" under "## Content Mix".
+    Falls back to _DEFAULT_CONTENT_MIX if the section is missing or malformed.
+    """
+    match = re.search(r"## Content Mix[^\n]*\n(.+?)(?=\n##|\Z)", strategy_md, re.DOTALL)
+    if not match:
+        return dict(_DEFAULT_CONTENT_MIX)
+
+    mix = {}
+    for line in match.group(1).splitlines():
+        m = re.match(r"-\s*([\w-]+)\s*:\s*(\d+)", line.strip())
+        if m:
+            mix[m.group(1)] = int(m.group(2))
+
+    if not mix or sum(mix.values()) == 0:
+        return dict(_DEFAULT_CONTENT_MIX)
+
+    # Normalise to exactly 24 slots if the total differs
+    total = sum(mix.values())
+    if total != 24:
+        # Scale proportionally, then fix rounding errors on the largest bucket
+        scaled = {k: max(1, round(v * 24 / total)) for k, v in mix.items()}
+        diff = 24 - sum(scaled.values())
+        if diff != 0:
+            largest = max(scaled, key=scaled.__getitem__)
+            scaled[largest] += diff
+        mix = scaled
+
+    return mix
 
 
 def build_slot_plan(
@@ -27,10 +60,12 @@ def build_slot_plan(
     """
     trend_context = web_client.search(f"{niche} news this week") or ""
 
+    content_mix = _parse_content_mix(strategy_md)
+
     # Build week/position skeleton
     skeleton = []
     hook_types = []
-    for hook, count in _CONTENT_MIX.items():
+    for hook, count in content_mix.items():
         hook_types.extend([hook] * count)
     # Distribute evenly: alternate hook types across weeks
     for i, hook in enumerate(hook_types):
@@ -54,7 +89,7 @@ Do not include week or position — just the 24 objects in order.
 """
     response = claude_client.messages.create(
         model="claude-sonnet-4-6",
-        max_tokens=1024,
+        max_tokens=4096,
         messages=[{"role": "user", "content": user}],
     )
     raw = response.content[0].text.strip()

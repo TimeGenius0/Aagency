@@ -1,0 +1,146 @@
+[
+  {
+    "week": 1,
+    "position": 1,
+    "hook_type": "contrarian",
+    "topic": "Your AI steering committee is the reason your AI transformation is stalling \u2014 why governance structures built for risk are killing speed"
+  },
+  {
+    "week": 1,
+    "position": 2,
+    "hook_type": "how-to",
+    "topic": "How to run a 30-day AI capability audit that actually tells you where to build vs. where to buy"
+  },
+  {
+    "week": 1,
+    "position": 3,
+    "hook_type": "story",
+    "topic": "The moment I realized our AI pilot had perfect metrics and zero business impact \u2014 what I changed after"
+  },
+  {
+    "week": 2,
+    "position": 1,
+    "hook_type": "opinion",
+    "topic": "Most CEOs are delegating AI strategy to the CTO \u2014 and that's exactly the wrong call"
+  },
+  {
+    "week": 2,
+    "position": 2,
+    "hook_type": "case-study",
+    "topic": "How one $2B industrial company killed 11 AI pilots and doubled down on one \u2014 and what the selection criteria actually looked like"
+  },
+  {
+    "week": 2,
+    "position": 3,
+    "hook_type": "listicle",
+    "topic": "5 questions every board should be asking about AI ROI that almost none are asking yet"
+  },
+  {
+    "week": 3,
+    "position": 1,
+    "hook_type": "contrarian",
+    "topic": "Buying an enterprise AI platform isn't a strategy \u2014 it's a way to feel like you have one"
+  },
+  {
+    "week": 3,
+    "position": 2,
+    "hook_type": "how-to",
+    "topic": "How to structure an AI business case that survives a CFO's first 10 minutes of scrutiny"
+  },
+  {
+    "week": 3,
+    "position": 3,
+    "hook_type": "behind-the-scenes",
+    "topic": "What our executive team's first real AI working session looked like \u2014 the awkward parts included"
+  },
+  {
+    "week": 4,
+    "position": 1,
+    "hook_type": "opinion",
+    "topic": "The talent you need most for AI transformation isn't an AI engineer \u2014 it's a translator who speaks both business and machine"
+  },
+  {
+    "week": 4,
+    "position": 2,
+    "hook_type": "case-study",
+    "topic": "How a professional services firm rewired its knowledge management around AI in 90 days \u2014 the org design decisions that made it work"
+  },
+  {
+    "week": 4,
+    "position": 3,
+    "hook_type": "contrarian",
+    "topic": "AI literacy programs for employees are mostly theater \u2014 here's what actually shifts behavior at scale"
+  },
+  {
+    "week": 5,
+    "position": 1,
+    "hook_type": "story",
+    "topic": "I asked our top 10 leaders how they used AI last week \u2014 the answers told me everything about where our transformation really stood"
+  },
+  {
+    "week": 5,
+    "position": 2,
+    "hook_type": "how-to",
+    "topic": "How to design an AI experimentation cadence that produces decisions, not just learnings"
+  },
+  {
+    "week": 5,
+    "position": 3,
+    "hook_type": "opinion",
+    "topic": "The CEOs winning at AI right now share one habit \u2014 they treat model behavior like a product risk, not an IT risk"
+  },
+  {
+    "week": 6,
+    "position": 1,
+    "hook_type": "case-study",
+    "topic": "How a mid-market retailer built an internal AI capability instead of buying \u2014 the 18-month honest post-mortem"
+  },
+  {
+    "week": 6,
+    "position": 2,
+    "hook_type": "contrarian",
+    "topic": "Your competitors' AI announcements are not your strategy signal \u2014 why benchmarking against peers is the most dangerous thing you can do right now"
+  },
+  {
+    "week": 6,
+    "position": 3,
+    "hook_type": "listicle",
+    "topic": "6 signs your organization is performing AI transformation rather than executing it"
+  },
+  {
+    "week": 7,
+    "position": 1,
+    "hook_type": "behind-the-scenes",
+    "topic": "How we rewrote our strategic planning process to account for AI-driven scenario uncertainty \u2014 what the new template actually looks like"
+  },
+  {
+    "week": 7,
+    "position": 2,
+    "hook_type": "how-to",
+    "topic": "How to identify the three internal workflows where AI will compound returns fastest \u2014 a framework for prioritization under resource constraints"
+  },
+  {
+    "week": 7,
+    "position": 3,
+    "hook_type": "story",
+    "topic": "The vendor demo that looked like magic and the six months it took us to figure out why it failed in production"
+  },
+  {
+    "week": 8,
+    "position": 1,
+    "hook_type": "contrarian",
+    "topic": "Responsible AI frameworks published by big consultancies are written for regulators, not operators \u2014 here's what a useful one actually looks like"
+  },
+  {
+    "week": 8,
+    "position": 2,
+    "hook_type": "opinion",
+    "topic": "AI is about to make your highest-paid knowledge workers either dramatically more valuable or completely redundant \u2014 and most talent strategies aren't choosing"
+  },
+  {
+    "week": 8,
+    "position": 3,
+    "hook_type": "case-study",
+    "topic": "How one CEO restructured their leadership team around AI-augmented decision-making \u2014 the roles that disappeared and the ones that emerged"
+  }
+]

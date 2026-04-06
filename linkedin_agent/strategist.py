@@ -16,10 +16,7 @@ Generated: {today} | Next review: {next_review}
 {themes}
 
 ## Content Mix (per 8-week cycle)
-- 40% thought leadership (contrarian takes)
-- 30% behind-the-scenes / build-in-public
-- 20% tactical how-tos
-- 10% personal story
+{content_mix}
 
 ## Posting Cadence
 3× per week — Mon / Wed / Fri
@@ -62,23 +59,26 @@ CONTENT GAPS: {', '.join(analysis.get('gaps', []))}
 INDUSTRY TRENDS: {analysis.get('trend_context', '')}
 BENCHMARKS: {analysis.get('benchmark_context', '')}
 
-Write the "What's Working", "What to Avoid", and "Industry Context" sections for a cycle 1 strategy.
-- What's Working: empty for cycle 1 (no engagement data yet). Write: "[No data yet — cycle 1]"
-- What to Avoid: based on gaps analysis. 2-3 bullets.
-- Industry Context: 3-4 sentences summarizing trends and benchmarks. Max 120 words.
+Write four sections for a cycle 1 strategy, separated by "|||":
+1. Content Mix: decide the best mix of post types for this niche (must total 24 posts).
+   Format each line as "- hook_type: N" where hook_type is one of: contrarian, behind-the-scenes, how-to, story, case-study, listicle, opinion, or any type that fits.
+   Choose types and counts that suit this niche and audience.
+2. What's Working: write "[No data yet — cycle 1]" (no engagement data yet).
+3. What to Avoid: based on gaps analysis. 2-3 bullets.
+4. Industry Context: 3-4 sentences summarizing trends and benchmarks. Max 120 words.
 
-Return only these three sections as plain text, separated by "|||".
-Format: <whats_working>|||<what_to_avoid>|||<industry_context>
+Format: <content_mix>|||<whats_working>|||<what_to_avoid>|||<industry_context>
 """
     response = claude_client.messages.create(
         model="claude-sonnet-4-6",
-        max_tokens=512,
+        max_tokens=600,
         messages=[{"role": "user", "content": user}],
     )
     parts = response.content[0].text.strip().split("|||")
-    whats_working = parts[0].strip() if len(parts) > 0 else "[No data yet — cycle 1]"
-    what_to_avoid = parts[1].strip() if len(parts) > 1 else ""
-    industry_context = parts[2].strip() if len(parts) > 2 else analysis.get("trend_context", "")
+    content_mix = parts[0].strip() if len(parts) > 0 else "- contrarian: 10\n- behind-the-scenes: 7\n- how-to: 5\n- story: 2"
+    whats_working = parts[1].strip() if len(parts) > 1 else "[No data yet — cycle 1]"
+    what_to_avoid = parts[2].strip() if len(parts) > 2 else ""
+    industry_context = parts[3].strip() if len(parts) > 3 else analysis.get("trend_context", "")
 
     strategy = _STRATEGY_TEMPLATE.format(
         cycle=cycle,
@@ -86,6 +86,7 @@ Format: <whats_working>|||<what_to_avoid>|||<industry_context>
         next_review=next_review,
         voice=analysis.get("voice", ""),
         themes=themes_str,
+        content_mix=content_mix,
         whats_working=whats_working,
         what_to_avoid=what_to_avoid,
         industry_context=industry_context,
@@ -123,27 +124,31 @@ CURRENT STRATEGY:
 REVIEW DATA (engagement + ratings from last 8 weeks):
 {review_md[:1500]}
 
-Update the strategy for cycle {cycle + 1}. Write these three sections only, separated by "|||":
-1. What's Working: bullet points of what drove high ratings/engagement
-2. What to Avoid: bullet points of what to drop or reduce
-3. Industry Context: 3-4 sentences of updated trends for the next cycle
+Update the strategy for cycle {cycle + 1}. Write four sections only, separated by "|||":
+1. Content Mix: adjust the post type mix based on what performed well (must total 24 posts).
+   Format each line as "- hook_type: N". Use the same hook types as the current strategy or introduce new ones if the data suggests it.
+2. What's Working: bullet points of what drove high ratings/engagement
+3. What to Avoid: bullet points of what to drop or reduce
+4. Industry Context: 3-4 sentences of updated trends for the next cycle
 
-Format: <whats_working>|||<what_to_avoid>|||<industry_context>
+Format: <content_mix>|||<whats_working>|||<what_to_avoid>|||<industry_context>
 """
     response = claude_client.messages.create(
         model="claude-sonnet-4-6",
-        max_tokens=512,
+        max_tokens=600,
         messages=[{"role": "user", "content": user}],
     )
     try:
         parts = response.content[0].text.strip().split("|||")
-        if len(parts) < 3:
-            raise ValueError(f"Expected 3 sections separated by '|||', got {len(parts)}")
-        whats_working = parts[0].strip()
-        what_to_avoid = parts[1].strip()
-        industry_context = parts[2].strip()
+        if len(parts) < 4:
+            raise ValueError(f"Expected 4 sections separated by '|||', got {len(parts)}")
+        content_mix = parts[0].strip()
+        whats_working = parts[1].strip()
+        what_to_avoid = parts[2].strip()
+        industry_context = parts[3].strip()
     except (ValueError, IndexError) as e:
         print(f"WARNING: Could not parse strategy update sections: {e}. Using placeholders.")
+        content_mix = "[Review strategy.md — Content Mix section not found]"
         whats_working = "[Review review.md manually — parsing failed]"
         what_to_avoid = "[Review review.md manually — parsing failed]"
         industry_context = "[Update manually]"
@@ -169,6 +174,7 @@ Format: <whats_working>|||<what_to_avoid>|||<industry_context>
         next_review=next_review,
         voice=voice,
         themes=themes,
+        content_mix=content_mix,
         whats_working=whats_working,
         what_to_avoid=what_to_avoid,
         industry_context=industry_context,

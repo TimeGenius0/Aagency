@@ -1,10 +1,43 @@
 # linkedin_agent/scraper.py
-"""LinkedIn scraping via Playwright (headed, human-speed) + raw-posts.txt fallback."""
+"""LinkedIn scraping via Playwright (headed Chrome + existing session) + raw-posts.txt fallback."""
 from __future__ import annotations
 import re
 import time
 import random
+import shutil
+import tempfile
 from pathlib import Path
+
+# Candidate Chrome executables in order of preference (Linux / macOS)
+_CHROME_CANDIDATES = [
+    "/usr/bin/google-chrome",
+    "/usr/bin/google-chrome-stable",
+    "/opt/google/chrome/google-chrome",
+    "/usr/bin/chromium-browser",
+    "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome",
+]
+
+# Default Chrome user-data directories per platform
+_CHROME_USER_DATA_DEFAULTS = [
+    Path.home() / ".config" / "google-chrome",          # Linux
+    Path.home() / "Library" / "Application Support" / "Google" / "Chrome",  # macOS
+]
+
+
+def _find_chrome_executable() -> str | None:
+    """Return the path to the Chrome binary, or None if not found."""
+    for path in _CHROME_CANDIDATES:
+        if Path(path).exists():
+            return path
+    return shutil.which("google-chrome") or shutil.which("google-chrome-stable")
+
+
+def _find_chrome_user_data() -> str | None:
+    """Return Chrome's default user-data directory, or None if not found."""
+    for path in _CHROME_USER_DATA_DEFAULTS:
+        if path.exists():
+            return str(path)
+    return None
 
 
 def parse_raw_posts(path: str) -> list[dict]:
@@ -50,9 +83,13 @@ def parse_raw_posts(path: str) -> list[dict]:
 
 def scrape_posts(linkedin_url: str, auth_path: str) -> list[dict]:
     """
-    Scrape ~50 most recent posts from a LinkedIn profile using Playwright.
-    Opens a headed browser. If auth_path session exists, reuses it.
-    If not, pauses for user to log in and saves the session.
+    Scrape ~50 most recent posts from a LinkedIn profile using Playwright + Chrome.
+
+    Uses Chrome's existing user-data directory so the current login session is
+    reused — no bot-detection friction from a fresh browser context.
+    Falls back to a Playwright storage-state file (auth_path) if Chrome's profile
+    directory cannot be located, then prompts for manual login as a last resort.
+
     Returns list of {text, date, likes, comments} dicts.
     Raises RuntimeError with fallback instructions on failure.
     """
@@ -60,23 +97,68 @@ def scrape_posts(linkedin_url: str, auth_path: str) -> list[dict]:
         from playwright.sync_api import sync_playwright
     except ImportError:
         raise RuntimeError(
-            "playwright not installed. Run: pip install playwright && playwright install chromium"
+            "playwright not installed. Run: pip install playwright && playwright install chrome"
         )
 
+    chrome_exe = _find_chrome_executable()
+    if not chrome_exe:
+        raise RuntimeError(
+            "Google Chrome not found. Install Chrome or set CHROME_EXECUTABLE env var."
+        )
+
+    chrome_user_data = _find_chrome_user_data()
     auth_file = Path(auth_path)
     auth_file.parent.mkdir(parents=True, exist_ok=True)
 
     with sync_playwright() as p:
-        context_kwargs = {}
-        if auth_file.exists():
-            context_kwargs["storage_state"] = str(auth_file)
+        if chrome_user_data:
+            # Copy Chrome profile to a temp dir so Playwright doesn't conflict
+            # with a running Chrome instance (locked profile directory).
+            print(f"[scraper] Copying Chrome profile from: {chrome_user_data}")
+            print("[scraper] This may take a few seconds...")
+            tmp_dir = tempfile.mkdtemp(prefix="chrome_playwright_")
+            try:
+                # Only copy the Default profile to keep it fast and small
+                src_default = Path(chrome_user_data) / "Default"
+                dst_default = Path(tmp_dir) / "Default"
+                shutil.copytree(
+                    str(src_default), str(dst_default),
+                    ignore=shutil.ignore_patterns("Singleton*"),
+                    dirs_exist_ok=False,
+                )
+            except Exception as e:
+                shutil.rmtree(tmp_dir, ignore_errors=True)
+                raise RuntimeError(f"Failed to copy Chrome profile: {e}")
 
-        browser = p.chromium.launch(headless=False)
-        context = browser.new_context(**context_kwargs)
-        page = context.new_page()
+            print("[scraper] Launching browser with copied profile...")
+            context = p.chromium.launch_persistent_context(
+                user_data_dir=tmp_dir,
+                executable_path=chrome_exe,
+                headless=False,
+                timeout=30_000,
+                args=[
+                    "--profile-directory=Default",
+                    "--no-first-run",
+                    "--no-default-browser-check",
+                    "--disable-session-crashed-bubble",
+                    "--disable-infobars",
+                    "--restore-last-session=false",
+                ],
+            )
+            page = context.new_page()
+        else:
+            # Fallback: fresh Chrome window with optional saved storage state
+            print("[scraper] Chrome profile not found; falling back to storage-state auth.")
+            launch_kwargs: dict = {"executable_path": chrome_exe, "headless": False}
+            browser = p.chromium.launch(**launch_kwargs)
+            context_kwargs: dict = {}
+            if auth_file.exists():
+                context_kwargs["storage_state"] = str(auth_file)
+            context = browser.new_context(**context_kwargs)
+            page = context.new_page()
 
         # Navigate to profile
-        page.goto(linkedin_url, wait_until="networkidle")
+        page.goto(linkedin_url, wait_until="load", timeout=60_000)
         _human_delay()
 
         # If not logged in, pause for user
@@ -86,11 +168,16 @@ def scrape_posts(linkedin_url: str, auth_path: str) -> list[dict]:
             input()
             _human_delay()
 
-        # Save session
-        context.storage_state(path=str(auth_file))
+        # Persist session to storage-state file (useful for the fallback path)
+        if not chrome_user_data:
+            context.storage_state(path=str(auth_file))
 
-        posts = _extract_posts(page, linkedin_url)
-        browser.close()
+        try:
+            posts = _extract_posts(page, linkedin_url)
+        finally:
+            context.close()
+            if chrome_user_data and 'tmp_dir' in locals():
+                shutil.rmtree(tmp_dir, ignore_errors=True)
         return posts
 
 
@@ -105,7 +192,7 @@ def _extract_posts(page, profile_url: str) -> list[dict]:
 
     # Navigate to posts tab
     posts_url = profile_url.rstrip("/") + "/recent-activity/shares/"
-    page.goto(posts_url, wait_until="networkidle")
+    page.goto(posts_url, wait_until="load", timeout=60_000)
     _human_delay()
 
     for _ in range(10):  # scroll up to 10 times
